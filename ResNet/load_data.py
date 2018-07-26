@@ -11,7 +11,13 @@ import numpy as np
 from PIL import Image
 
 
-def load_data(pos_path = None, neg_path = None, max_pos = 500, max_neg = 500, test = False):
+def load_data(
+	pos_path = None,
+	neg_path = None, 
+	max_pos = 500, 
+	max_neg = 500, 
+	test = False, 
+	train_only = False):
 	"""
 	load pil image data into numpy arrays
 
@@ -84,18 +90,54 @@ def load_data(pos_path = None, neg_path = None, max_pos = 500, max_neg = 500, te
 	n_train = n_X - n_test
 	
 	# split data into training set and test set
-	if not test:
-		X_train_orig = X[0:n_train]
-		X_test_orig = X[-n_test:]
-		Y_train_orig = Y[0:n_train]
-		Y_test_orig = Y[-n_test:]
-		return X_train_orig, X_test_orig, Y_train_orig, Y_test_orig
+	if not test:	
+		if train_only:
+			n_test = 0
+			n_train = n_X - n_test
+			X_train_orig = X[0:n_train]
+			X_test_orig = None
+			Y_train_orig = Y[0:n_train]
+			Y_test_orig = None
+			return X_train_orig, X_test_orig, Y_train_orig, Y_test_orig
+		else:
+			X_train_orig = X[0:n_train]
+			X_test_orig = X[-n_test:]
+			Y_train_orig = Y[0:n_train]
+			Y_test_orig = Y[-n_test:]
+			return X_train_orig, X_test_orig, Y_train_orig, Y_test_orig
+
+
+
 	else:
 		X_test_orig = X[:]
 		Y_test_orig = Y[:]
 		X_train_orig = None
 		Y_train_orig = None
 		return X_train_orig, X_test_orig, Y_train_orig, Y_test_orig
+
+
+def load_data_as_generator(
+	pos_path = "pos", 
+	neg_path = "neg" , 
+	valid_data_path = "testSets"):
+	"""
+	"""
+	home_path = os.path.abspath("..")
+	data_path = "data"
+	train_data_path = "trainSets"
+	path_base = home_path + os.sep + data_path + os.sep
+
+	pos_path = path_base + train_data_path + os.sep + pos_path
+	neg_path = path_base + train_data_path + os.sep + neg_path
+
+	valid_path_base = path_base + valid_data_path + os.sep
+	valid_pos = valid_path_base + "pos_76_79"
+	valid_neg = valid_path_base + "neg_76_79"
+
+	
+
+
+
 
 
 if __name__ == "__main__":

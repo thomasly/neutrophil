@@ -1,0 +1,5 @@
+Model: ResNet50 with MaxPooling((3,3), strides=(2,2)) at the beginning
+Data: augmented tiles from 80
+Method: split tiles into folders. Each folder contains 500 tiles. Load 500 positive and 500 negative tiles into training dataset each time. Iterate through each training dataset 2 times before loading the next dataset. Epochs = 20. Training folders: pos0 - pos14, neg0 - neg14.
+	Epochs: 20
+	Batch_size: 32

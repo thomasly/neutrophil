@@ -16,8 +16,10 @@
 # In[26]:
 
 import numpy as np
-from keras import layers
-from keras.layers import Input, Add, Dense, Activation, ZeroPadding2D, BatchNormalization, Flatten, Conv2D, AveragePooling2D, MaxPooling2D, GlobalMaxPooling2D
+from keras import layers, optimizers
+from keras.layers import Input, Add, Dense, Activation, ZeroPadding2D
+from keras.layers import BatchNormalization, Flatten, Conv2D, AveragePooling2D
+from keras.layers import MaxPooling2D, GlobalMaxPooling2D
 from keras.models import Model, load_model
 from keras.preprocessing import image
 from keras.utils import layer_utils
@@ -227,8 +229,8 @@ def ResNet50(input_shape = (299, 299, 3), classes = 1):
 def main():
     model = ResNet50(input_shape = (299, 299, 3), classes = 1)
 
-
-    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    adam = optimizer.Adam(lr = 1e-4)
+    model.compile(optimizer=adam, loss='binary_crossentropy', metrics=['accuracy'])
 
 
     X_train_orig, X_test_orig, Y_train_orig, Y_test_orig = ld.load_data(max_pos=100, max_neg=100)

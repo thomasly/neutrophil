@@ -5,11 +5,11 @@ from keras.models import Model
 
 def test_model():
 
-	POS = "pos_76_79"
-	NEG = "neg_76_79"
+	POS = "pos18"
+	NEG = "neg25"
 
 	model = load_model_from_json()
-	test_data_path_base = ".." + os.sep + "testSets" + os.sep
+	test_data_path_base = ".." + os.sep + "batches" + os.sep
 
 	pos_path = test_data_path_base + POS
 	neg_path = test_data_path_base + NEG
