@@ -36,10 +36,9 @@ def load_data(
 
 	# paths to positive/negative images
 	
-	if pos_path is None and os.path.exists('../pos'):
-		pos_path = os.path.abspath('../pos')
-	if neg_path is None and os.path.exists('../neg'):
-		neg_path = os.path.abspath('../neg') 
+	
+	pos_path = os.path.abspath('../data/orig/80/pos')
+	neg_path = os.path.abspath('../data/orig/80/neg') 
 
 	# open positive/negative images and transform them into np arrays
 	i = 0

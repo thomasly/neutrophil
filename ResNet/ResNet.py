@@ -25,7 +25,6 @@ from keras.preprocessing import image
 from keras.utils import layer_utils
 from keras.utils.data_utils import get_file
 from keras.applications.imagenet_utils import preprocess_input
-import pydot
 from IPython.display import SVG
 from keras.utils.vis_utils import model_to_dot
 from keras.utils import plot_model
@@ -229,7 +228,7 @@ def ResNet50(input_shape = (299, 299, 3), classes = 1):
 def main():
     model = ResNet50(input_shape = (299, 299, 3), classes = 1)
 
-    adam = optimizer.Adam(lr = 1e-4)
+    adam = optimizers.Adam(lr = 1e-4)
     model.compile(optimizer=adam, loss='binary_crossentropy', metrics=['accuracy'])
 
 

@@ -5,6 +5,7 @@
 import os, sys, random
 import shutil
 
+
 def distribute_files(orig_path, train_ratio):
 	"""
 	"""
