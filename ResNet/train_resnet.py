@@ -6,6 +6,7 @@ import os, h5py
 from keras.models import model_from_json
 from math import ceil
 from datetime import datetime
+from keras.callbacks import CSVLogger
 
 def load_model_from_json(model_path=None, weights_path=None):
 	"""
@@ -39,7 +40,7 @@ def load_model_from_json(model_path=None, weights_path=None):
 
 	return model
 
-def train_resnet(new_model=False, batch_size = 32):
+def train_resnet(new_model = False, batch_size = 32, epochs = 20):
     """
     """
     start_time = datetime.now()
@@ -63,17 +64,24 @@ def train_resnet(new_model=False, batch_size = 32):
     
     steps_per_epoch = int(ceil(n_train / batch_size))
     validation_steps = int(ceil(n_test / batch_size))
+    training_generator = read_hdf5(
+            hdf5_path, 
+            batch_size = batch_size,
+            epochs = epochs)
+    validation_generator = read_hdf5(
+            hdf5_path, 
+            dataset = "test", 
+            batch_size = batch_size,
+            epochs = epochs
+            )
+    csv_logger = CSVLogger('training.log')
     model.fit_generator(
-            read_hdf5(hdf5_path, batch_size = batch_size), 
+            training_generator, 
             steps_per_epoch = steps_per_epoch,
-            epochs = 20,
+            epochs = epochs,
             verbose = 1, 
-            callbacks = None,
-            validation_data = read_hdf5(
-                    hdf5_path, 
-                    dataset = "test", 
-                    batch_size = batch_size
-                    ),
+            callbacks = [csv_logger],
+            validation_data = validation_generator,
             validation_steps = validation_steps
             )
             
@@ -82,7 +90,7 @@ def train_resnet(new_model=False, batch_size = 32):
     print("Training time: ", datetime.now() - start_time)
     
 def main():
-    train_resnet()
+    train_resnet(new_model=True)
     
 if __name__ == "__main__":
     main()

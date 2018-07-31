@@ -2,18 +2,7 @@
 # coding: utf-8
 
 # # Residual Networks
-# 
-# Welcome to the second assignment of this week! You will learn how to build very deep convolutional networks, using Residual Networks (ResNets). In theory, very deep networks can represent very complex functions; but in practice, they are hard to train. Residual Networks, introduced by [He et al.](https://arxiv.org/pdf/1512.03385.pdf), allow you to train much deeper networks than were previously practically feasible.
-# 
-# **In this assignment, you will:**
-# - Implement the basic building blocks of ResNets. 
-# - Put together these building blocks to implement and train a state-of-the-art neural network for image classification. 
-# 
-# This assignment will be done in Keras. 
-# 
-# Before jumping into the problem, let's run the cell below to load the required packages.
 
-# In[26]:
 
 import numpy as np
 from keras import optimizers
@@ -21,22 +10,13 @@ from keras.layers import Input, Add, Dense, Activation, ZeroPadding2D
 from keras.layers import BatchNormalization, Flatten, Conv2D, AveragePooling2D
 from keras.layers import MaxPooling2D
 from keras.models import Model
-
-
-
-
-
-
 # from resnets_utils import *
 from keras.initializers import glorot_uniform
 # from matplotlib.pyplot import imshow
 # get_ipython().magic('matplotlib inline')
-
 import keras.backend as K
 K.set_image_data_format('channels_last')
 K.set_learning_phase(1)
-
-import load_data as ld
 
 
 def identity_block(X, f, filters, stage, block):
@@ -223,53 +203,53 @@ def ResNet50(input_shape = (299, 299, 3), classes = 1):
     return model
 
 
-def main():
-    model = ResNet50(input_shape = (299, 299, 3), classes = 1)
-
-    adam = optimizers.Adam(lr = 1e-4)
-    model.compile(optimizer=adam, loss='binary_crossentropy', metrics=['accuracy'])
-
-
-    X_train_orig, X_test_orig, Y_train_orig, Y_test_orig = ld.load_data(max_pos=100, max_neg=100)
-
-    # Normalize image vectors
-    X_train = X_train_orig/255.0
-    X_test = X_test_orig/255.0
-    Y_train = np.squeeze(Y_train_orig)
-    Y_test = np.squeeze(Y_test_orig)
-
-    # Convert training and test labels to one hot matrices
-    # Y_train = convert_to_one_hot(Y_train_orig, 6).T
-    # Y_test = convert_to_one_hot(Y_test_orig, 6).T
-
-    print ("number of training examples = " + str(X_train.shape[0]))
-    print ("number of test examples = " + str(X_test.shape[0]))
-    print ("X_train shape: " + str(X_train.shape))
-    print ("Y_train shape: " + str(Y_train.shape))
-    print ("X_test shape: " + str(X_test.shape))
-    print ("Y_test shape: " + str(Y_test.shape))
-
-
-    # fit model
-    model.fit(X_train, Y_train, epochs = 5, batch_size = 128)
-
-    # test the model on test dataset
-    preds = model.evaluate(X_test, Y_test)
-    print ("Loss = " + str(preds[0]))
-    print ("Test Accuracy = " + str(preds[1]))
-
-    # save model and weights into files
-    model_to_json = model.to_json()
-    with open("resModel.json", "w") as f:
-        f.write(model_to_json)
-
-    model.save_weights("modelWeights.h5")
-
-    print("Model and weights saved.")
-
-    # print summary
-    # model.summary()
-
-
-if __name__ == '__main__':
-    main()
+#def main():
+#    model = ResNet50(input_shape = (299, 299, 3), classes = 1)
+#
+#    adam = optimizers.Adam(lr = 1e-4)
+#    model.compile(optimizer=adam, loss='binary_crossentropy', metrics=['accuracy'])
+#
+#
+#    X_train_orig, X_test_orig, Y_train_orig, Y_test_orig = ld.load_data(max_pos=100, max_neg=100)
+#
+#    # Normalize image vectors
+#    X_train = X_train_orig/255.0
+#    X_test = X_test_orig/255.0
+#    Y_train = np.squeeze(Y_train_orig)
+#    Y_test = np.squeeze(Y_test_orig)
+#
+#    # Convert training and test labels to one hot matrices
+#    # Y_train = convert_to_one_hot(Y_train_orig, 6).T
+#    # Y_test = convert_to_one_hot(Y_test_orig, 6).T
+#
+#    print ("number of training examples = " + str(X_train.shape[0]))
+#    print ("number of test examples = " + str(X_test.shape[0]))
+#    print ("X_train shape: " + str(X_train.shape))
+#    print ("Y_train shape: " + str(Y_train.shape))
+#    print ("X_test shape: " + str(X_test.shape))
+#    print ("Y_test shape: " + str(Y_test.shape))
+#
+#
+#    # fit model
+#    model.fit(X_train, Y_train, epochs = 5, batch_size = 128)
+#
+#    # test the model on test dataset
+#    preds = model.evaluate(X_test, Y_test)
+#    print ("Loss = " + str(preds[0]))
+#    print ("Test Accuracy = " + str(preds[1]))
+#
+#    # save model and weights into files
+#    model_to_json = model.to_json()
+#    with open("resModel.json", "w") as f:
+#        f.write(model_to_json)
+#
+#    model.save_weights("modelWeights.h5")
+#
+#    print("Model and weights saved.")
+#
+#    # print summary
+#    # model.summary()
+#
+#
+#if __name__ == '__main__':
+#    main()
