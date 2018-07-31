@@ -21,10 +21,10 @@ def read_hdf5(path, dataset="train", batch_size = 32):
         n_start = num * batch_size
         n_end = min((num + 1) * batch_size, m_data)
         
-        images = hdf5_file[data_img][n_start:n_end, ...]
-        labels = hdf5_file[data_labels][n_start:n_end]
+        inputs = hdf5_file[data_img][n_start:n_end, ...]
+        targets = hdf5_file[data_labels][n_start:n_end]
         
-        yield images, labels
+        yield (inputs, targets)
         
     hdf5_file.close()
         

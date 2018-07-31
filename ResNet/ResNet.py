@@ -16,21 +16,19 @@
 # In[26]:
 
 import numpy as np
-from keras import layers, optimizers
+from keras import optimizers
 from keras.layers import Input, Add, Dense, Activation, ZeroPadding2D
 from keras.layers import BatchNormalization, Flatten, Conv2D, AveragePooling2D
-from keras.layers import MaxPooling2D, GlobalMaxPooling2D
-from keras.models import Model, load_model
-from keras.preprocessing import image
-from keras.utils import layer_utils
-from keras.utils.data_utils import get_file
-from keras.applications.imagenet_utils import preprocess_input
-from IPython.display import SVG
-from keras.utils.vis_utils import model_to_dot
-from keras.utils import plot_model
+from keras.layers import MaxPooling2D
+from keras.models import Model
+
+
+
+
+
+
 # from resnets_utils import *
 from keras.initializers import glorot_uniform
-import scipy.misc
 # from matplotlib.pyplot import imshow
 # get_ipython().magic('matplotlib inline')
 
