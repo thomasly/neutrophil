@@ -70,7 +70,7 @@ def train_resnet(
     steps_per_epoch = int(ceil(n_train / batch_size))
     validation_steps = int(ceil(n_test / batch_size))
 
-    history = LossHistory('training.log')
+    history = LossHistory('epoch_loss.log', 'batch_loss.log')
     
     try:
         model.fit_generator(

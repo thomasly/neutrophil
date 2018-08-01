@@ -22,9 +22,10 @@ class LossHistory(Callback):
             training). False: overwrite existing file,
     """
 
-    def __init__(self, filename, separator=',', append=False):
+    def __init__(self, epoch_filename, batch_filename, separator=',', append=False):
         self.sep = separator
-        self.filename = filename
+        self.epoch_filename = epoch_filename
+        self.batch_filename = batch_filename
         self.append = append
         self.writer = None
         self.keys = None
@@ -35,20 +36,58 @@ class LossHistory(Callback):
 
     def on_train_begin(self, logs=None):
         if self.append:
-            if os.path.exists(self.filename):
-                with open(self.filename, 'r' + self.file_flags) as f:
+            if os.path.exists(self.epoch_filename):
+                with open(self.epoch_filename, 'r' + self.file_flags) as f:
                     self.append_header = not bool(len(f.readline()))
-            self.csv_file = open(self.filename, 'a' + self.file_flags)
+            self.epoch_csv_file = open(self.epoch_filename, 'a' + self.file_flags)
         else:
-            self.csv_file = open(self.filename, 'w' + self.file_flags)
+            self.epoch_csv_file = open(self.epoch_filename, 'w' + self.file_flags)
+            
+        if self.append:
+            if os.path.exists(self.batch_filename):
+                with open(self.batch_filename, 'r' + self.file_flags) as f:
+                    self.append_header = not bool(len(f.readline()))
+            self.batch_csv_file = open(self.batch_filename, 'a' + self.file_flags)
+        else:
+            self.batch_csv_file = open(self.batch_filename, 'w' + self.file_flags)
             
     def on_epoch_begin(self, epoch, logs=None):
         self.epoch = epoch
         
         
     def on_epoch_end(self, epoch, logs=None):
-        pass
+        logs = logs or {}
 
+        def handle_value(k):
+            is_zero_dim_ndarray = isinstance(k, np.ndarray) and k.ndim == 0
+            if isinstance(k, six.string_types):
+                return k
+            elif isinstance(k, Iterable) and not is_zero_dim_ndarray:
+                return '"[%s]"' % (', '.join(map(str, k)))
+            else:
+                return k
+
+        if self.keys is None:
+            self.keys = sorted(logs.keys())
+
+        if self.model.stop_training:
+            # We set NA so that csv parsers do not fail for this last epoch.
+            logs = dict([(k, logs[k]) if k in logs else (k, 'NA') for k in self.keys])
+
+        if not self.writer:
+            class CustomDialect(csv.excel):
+                delimiter = self.sep
+
+            self.writer = csv.DictWriter(self.epoch_csv_file,
+                                         fieldnames=['epoch'] + self.keys, dialect=CustomDialect)
+            if self.append_header:
+                self.writer.writeheader()
+
+        row_dict = OrderedDict({'epoch': epoch})
+        row_dict.update((key, handle_value(logs[key])) for key in self.keys)
+        self.writer.writerow(row_dict)
+        self.epoch_csv_file.flush()
+        
 
     def on_batch_end(self, batch, logs=None):
         logs = logs or {}
@@ -73,7 +112,7 @@ class LossHistory(Callback):
             class CustomDialect(csv.excel):
                 delimiter = self.sep
 
-            self.writer = csv.DictWriter(self.csv_file,
+            self.writer = csv.DictWriter(self.batch_csv_file,
                                          fieldnames=['epoch'] + ['batch_total'] + self.keys, dialect=CustomDialect)
             if self.append_header:
                 self.writer.writeheader()
@@ -82,8 +121,10 @@ class LossHistory(Callback):
         row_dict = OrderedDict({'epoch': self.epoch, 'batch_total': n_batch})
         row_dict.update((key, handle_value(logs[key])) for key in self.keys)
         self.writer.writerow(row_dict)
-        self.csv_file.flush()
+        self.batch_csv_file.flush()
+        
 
     def on_train_end(self, logs=None):
-        self.csv_file.close()
+        self.epoch_csv_file.close()
+        self.batch_csv_file.close()
         self.writer = None
