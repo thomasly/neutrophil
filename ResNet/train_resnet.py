@@ -102,22 +102,11 @@ def train_resnet(
             print("Validation accuracy: {}".format(preds[1]))
         
         hdf5_file.close()
-        model_to_json = model.to_json()
-        with open("resModel.json", "w") as f:
-            f.write(model_to_json)
-        print("Model saved to resModel.json!")
-        model.save_weights("modelWeights.h5")
-        print("Model weights saved to modelWeights.h5")
 
     except StopIteration:
+        
         hdf5_file.close()
-        model_to_json = model.to_json()
-        with open("resModel.json", "w") as f:
-            f.write(model_to_json)
-        print("Model saved to resModel.json!")
-        model.save_weights("modelWeights.h5")
-        print("Model weights saved to modelWeights.h5")
-               
+        
     print("Training time: ", datetime.now() - start_time)
     
 def main():

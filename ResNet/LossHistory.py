@@ -56,7 +56,6 @@ class LossHistory(Callback):
     def on_epoch_begin(self, epoch, logs=None):
         self.epoch = epoch
         
-        
     def on_epoch_end(self, epoch, logs=None):
         logs = logs or {}
 
@@ -89,6 +88,13 @@ class LossHistory(Callback):
         row_dict.update((key, handle_value(logs[key])) for key in self.epoch_keys)
         self.epoch_writer.writerow(row_dict)
         self.epoch_csv_file.flush()
+        
+        model_to_json = self.model.to_json()
+        with open("resModel.json", "w") as f:
+            f.write(model_to_json)
+        print("Model saved to resModel.json!")
+        self.model.save_weights("modelWeights.h5")
+        print("Model weights saved to modelWeights.h5")
         
 
     def on_batch_end(self, batch, logs=None):
