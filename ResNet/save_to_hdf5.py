@@ -14,7 +14,8 @@ from random import shuffle
 def save_to_hdf5(path):
     """
     """
-    TRAINING_DATA_PECENTAGE = 0.9
+    TRAINING_DATA_PECENTAGE = 0.8
+    TESTING_DATA_PECENTAGE = 0.1
     
     src_path = os.path.abspath(path)
     des_path = os.path.join(src_path, "..")
@@ -29,29 +30,37 @@ def save_to_hdf5(path):
     files, labels = zip(*c)
     
     m = len(files)
-    part = int(m * TRAINING_DATA_PECENTAGE)
-    x_train = files[0 : part]
-    x_test = files[part : ]
-    y_train = labels[0 : part]
-    y_test = labels[part : ]
+    part_train = int(m * TRAINING_DATA_PECENTAGE)
+    part_test = part_train + int(m * TESTING_DATA_PECENTAGE)
+    x_train = files[0 : part_train]
+    x_test = files[part_train : part_test]
+    x_val = files[part_test : ]
+    y_train = labels[0 : part_train]
+    y_test = labels[part_train : part_test]
+    y_val = labels[part_test : ]
     
     train_shape = (len(x_train), 299, 299, 3)
     test_shape = (len(x_test), 299, 299, 3)
+    val_shape = (len(x_val), 299, 299, 3)
     
     hdf5_file = h5py.File(des_path, mode = 'w')
     m_train = len(x_train)
     m_test = len(x_test)
+    m_val = len(x_val)
     
     hdf5_file.create_dataset("train_img", train_shape, np.int8)
     hdf5_file.create_dataset("test_img", test_shape, np.int8)
+    hdf5_file.create_dataset("val_img", val_shape, np.int8)
     
     hdf5_file.create_dataset("train_labels", (m_train,), np.int8)
     hdf5_file.create_dataset("test_labels", (m_test,), np.int8)
+    hdf5_file.create_dataset("val_labels", (m_val,), np.int8)
     
     hdf5_file.create_dataset("train_mean", train_shape[1:], np.float32)
     
     hdf5_file["train_labels"][...] = y_train
     hdf5_file["test_labels"][...] = y_test
+    hdf5_file["val_labels"][...] = y_val
     
     mean = np.zeros(train_shape[1:], np.float32)
   
@@ -76,6 +85,16 @@ def save_to_hdf5(path):
         img = np.array(img)
         img = img[:, :, 0:3]
         hdf5_file["test_img"][i, ...] = img
+    
+    for i in range(m_val):
+        if i % 100 == 0 and i > 1:
+            print("Validation data: {}/{}".format(i, m_val))
+            
+        x = x_val[i]
+        img = Image.open(x)
+        img = np.array(img)
+        img = img[:, :, 0:3]
+        hdf5_file["val_img"][i, ...] = img
         
     hdf5_file["train_mean"][...] = mean
     hdf5_file.close()

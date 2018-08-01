@@ -2,7 +2,7 @@
 
 from ResNet import ResNet50
 from read_hdf5 import read_hdf5
-import os, h5py
+import os, sys, h5py
 from keras.models import model_from_json
 from math import ceil
 from datetime import datetime
@@ -60,37 +60,54 @@ def train_resnet(new_model = False, batch_size = 32, epochs = 20):
     hdf5_file = h5py.File(hdf5_path, mode = 'r')
     n_train = hdf5_file["train_img"].shape[0]
     n_test = hdf5_file["test_img"].shape[0]
-    hdf5_file.close()
     
     steps_per_epoch = int(ceil(n_train / batch_size))
     validation_steps = int(ceil(n_test / batch_size))
-    training_generator = read_hdf5(
-            hdf5_path, 
-            batch_size = batch_size,
-            epochs = epochs)
-    validation_generator = read_hdf5(
-            hdf5_path, 
-            dataset = "test", 
-            batch_size = batch_size,
-            epochs = epochs
-            )
+
     csv_logger = CSVLogger('training.log')
-    model.fit_generator(
-            training_generator, 
-            steps_per_epoch = steps_per_epoch,
-            epochs = epochs,
-            verbose = 1, 
-            callbacks = [csv_logger],
-            validation_data = validation_generator,
-            validation_steps = validation_steps
-            )
-            
-    model.save_weights("modelWeights.h5")
     
+    try:
+        model.fit_generator(
+                read_hdf5(
+                        hdf5_file, 
+                        batch_size = batch_size,
+                        epochs = epochs
+                        ), 
+                steps_per_epoch = steps_per_epoch,
+                epochs = epochs,
+                verbose = 1, 
+                callbacks = [csv_logger],
+                validation_data = read_hdf5(
+                        hdf5_file, 
+                        dataset = "test", 
+                        batch_size = batch_size,
+                        epochs = epochs
+                        ),
+                validation_steps = validation_steps
+                )
+        
+        hdf5_file.close()
+        model_to_json = model.to_json()
+        with open("resModel.json", "w") as f:
+            f.write(model_to_json)
+        model.save_weights("modelWeights.h5")
+
+    except StopIteration:
+        hdf5_file.close()
+        model_to_json = model.to_json()
+        with open("resModel.json", "w") as f:
+            f.write(model_to_json)
+        model.save_weights("modelWeights.h5")
+        print(StopIteration.with_traceback)
+        
+            
     print("Training time: ", datetime.now() - start_time)
     
 def main():
-    train_resnet(new_model=True)
+    try:
+        train_resnet(sys.argv[1], sys.argv[2], sys.argv[3])
+    except IndexError:
+        train_resnet(new_model=False)
     
 if __name__ == "__main__":
     main()
