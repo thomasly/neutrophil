@@ -127,12 +127,12 @@ def main():
         new_model = False
         
     try:
-        batch_size = sys.argv[2]
+        batch_size = int(sys.argv[2])
     except IndexError:
         batch_size = 32
         
     try:
-        epochs = sys.argv[3]
+        epochs = int(sys.argv[3])
     except IndexError:
         epochs = 100
         
