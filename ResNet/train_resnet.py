@@ -6,7 +6,7 @@ import os, sys, h5py
 from keras.models import model_from_json
 from math import ceil
 from datetime import datetime
-from keras.callbacks import CSVLogger
+from LossHistory import LossHistory
 
 def load_model_from_json(model_path=None, weights_path=None):
 	"""
@@ -70,7 +70,7 @@ def train_resnet(
     steps_per_epoch = int(ceil(n_train / batch_size))
     validation_steps = int(ceil(n_test / batch_size))
 
-    csv_logger = CSVLogger('training.log')
+    history = LossHistory('training.log')
     
     try:
         model.fit_generator(
@@ -82,7 +82,7 @@ def train_resnet(
                 steps_per_epoch = steps_per_epoch,
                 epochs = epochs,
                 verbose = 1, 
-                callbacks = [csv_logger],
+                callbacks = [history],
                 validation_data = read_hdf5(
                         hdf5_file, 
                         dataset = "test", 
@@ -122,9 +122,9 @@ def train_resnet(
     
 def main():
     try:
-        new_model = sys.argv[1]
+        new_model = bool(int(sys.argv[1]))
     except IndexError:
-        new_model = False
+        new_model = True
         
     try:
         batch_size = int(sys.argv[2])
@@ -134,10 +134,10 @@ def main():
     try:
         epochs = int(sys.argv[3])
     except IndexError:
-        epochs = 100
+        epochs = 60
         
     try:
-        validation = sys.argv[4]
+        validation = bool(int(sys.argv[4]))
     except IndexError:
         validation = True
     
