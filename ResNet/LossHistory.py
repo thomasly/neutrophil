@@ -29,7 +29,8 @@ class LossHistory(Callback):
         self.append = append
         self.batch_writer = None
         self.epoch_writer = None
-        self.keys = None
+        self.batch_keys = None
+        self.epoch_keys = None
         self.append_header = True
         self.file_flags = 'b' if six.PY2 and os.name == 'nt' else ''
         super(Callback, self).__init__()
@@ -68,24 +69,24 @@ class LossHistory(Callback):
             else:
                 return k
 
-        if self.keys is None:
-            self.keys = sorted(logs.keys())
+        if self.epoch_keys is None:
+            self.epoch_keys = sorted(logs.keys())
 
         if self.model.stop_training:
             # We set NA so that csv parsers do not fail for this last epoch.
-            logs = dict([(k, logs[k]) if k in logs else (k, 'NA') for k in self.keys])
+            logs = dict([(k, logs[k]) if k in logs else (k, 'NA') for k in self.epoch_keys])
 
         if not self.epoch_writer:
             class CustomDialect(csv.excel):
                 delimiter = self.sep
 
             self.epoch_writer = csv.DictWriter(self.epoch_csv_file,
-                                         fieldnames=['epoch'] + self.keys, dialect=CustomDialect)
+                                         fieldnames=['epoch'] + self.epoch_keys, dialect=CustomDialect)
             if self.append_header:
                 self.epoch_writer.writeheader()
 
         row_dict = OrderedDict({'epoch': epoch})
-        row_dict.update((key, handle_value(logs[key])) for key in self.keys)
+        row_dict.update((key, handle_value(logs[key])) for key in self.epoch_keys)
         self.epoch_writer.writerow(row_dict)
         self.epoch_csv_file.flush()
         
@@ -102,25 +103,25 @@ class LossHistory(Callback):
             else:
                 return k
 
-        if self.keys is None:
-            self.keys = sorted(logs.keys())
+        if self.batch_keys is None:
+            self.batch_keys = sorted(logs.keys())
 
         if self.model.stop_training:
             # We set NA so that csv parsers do not fail for this last epoch.
-            logs = dict([(k, logs[k]) if k in logs else (k, 'NA') for k in self.keys])
+            logs = dict([(k, logs[k]) if k in logs else (k, 'NA') for k in self.batch_keys])
 
         if not self.batch_writer:
             class CustomDialect(csv.excel):
                 delimiter = self.sep
 
             self.batch_writer = csv.DictWriter(self.batch_csv_file,
-                                         fieldnames=['epoch'] + ['batch_total'] + self.keys, dialect=CustomDialect)
+                                         fieldnames=['epoch'] + ['batch_total'] + self.batch_keys, dialect=CustomDialect)
             if self.append_header:
                 self.batch_writer.writeheader()
         
         n_batch = self.params['steps'] * self.epoch + batch
         row_dict = OrderedDict({'epoch': self.epoch, 'batch_total': n_batch})
-        row_dict.update((key, handle_value(logs[key])) for key in self.keys)
+        row_dict.update((key, handle_value(logs[key])) for key in self.batch_keys)
         self.batch_writer.writerow(row_dict)
         self.batch_csv_file.flush()
         
