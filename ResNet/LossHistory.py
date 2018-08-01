@@ -74,7 +74,7 @@ class LossHistory(Callback):
                 delimiter = self.sep
 
             self.writer = csv.DictWriter(self.csv_file,
-                                         fieldnames=['epoch'] + ['batch'] + self.keys, dialect=CustomDialect)
+                                         fieldnames=['epoch'] + ['batch_total'] + self.keys, dialect=CustomDialect)
             if self.append_header:
                 self.writer.writeheader()
         
