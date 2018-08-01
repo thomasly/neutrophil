@@ -97,7 +97,7 @@ def train_resnet(
             eva_labels = hdf5_file["val_labels"][...]
             print("Validation data shape: {}".format(str(eva_data.shape)))
             print("validation labels shape: {}".format(str(eva_labels.shape)))
-            preds = model.evaluation()
+            preds = model.evaluate(eva_data, eva_labels)
             print("Validation loss: {}".format(preds[0]))
             print("Validation accuracy: {}".format(preds[1]))
         
