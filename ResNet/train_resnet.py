@@ -40,7 +40,13 @@ def load_model_from_json(model_path=None, weights_path=None):
 
 	return model
 
-def train_resnet(new_model = False, batch_size = 32, epochs = 20):
+def train_resnet(
+        new_model = False, 
+        batch_size = 32, 
+        epochs = 20, 
+        validation = True
+        ):
+    
     """
     """
     start_time = datetime.now()
@@ -86,28 +92,56 @@ def train_resnet(new_model = False, batch_size = 32, epochs = 20):
                 validation_steps = validation_steps
                 )
         
+        if validation:
+            eva_data = hdf5_file["val_img"][...]
+            eva_labels = hdf5_file["val_labels"][...]
+            print("Validation data shape: {}".format(str(eva_data.shape)))
+            print("validation labels shape: {}".format(str(eva_labels.shape)))
+            preds = model.evaluation()
+            print("Validation loss: {}".format(preds[0]))
+            print("Validation accuracy: {}".format(preds[1]))
+        
         hdf5_file.close()
         model_to_json = model.to_json()
         with open("resModel.json", "w") as f:
             f.write(model_to_json)
+        print("Model saved to resModel.json!")
         model.save_weights("modelWeights.h5")
+        print("Model weights saved to modelWeights.h5")
 
     except StopIteration:
         hdf5_file.close()
         model_to_json = model.to_json()
         with open("resModel.json", "w") as f:
             f.write(model_to_json)
+        print("Model saved to resModel.json!")
         model.save_weights("modelWeights.h5")
-        print(StopIteration.with_traceback)
-        
-            
+        print("Model weights saved to modelWeights.h5")
+               
     print("Training time: ", datetime.now() - start_time)
     
 def main():
     try:
-        train_resnet(sys.argv[1], int(sys.argv[2]), int(sys.argv[3]))
+        new_model = sys.argv[1]
     except IndexError:
-        train_resnet(new_model=False)
+        new_model = False
+        
+    try:
+        batch_size = sys.argv[2]
+    except IndexError:
+        batch_size = 32
+        
+    try:
+        epochs = sys.argv[3]
+    except IndexError:
+        epochs = 100
+        
+    try:
+        validation = sys.argv[4]
+    except IndexError:
+        validation = True
+    
+    train_resnet(new_model, batch_size, epochs, validation)
     
 if __name__ == "__main__":
     main()

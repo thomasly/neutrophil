@@ -4,8 +4,6 @@
 # # Residual Networks
 
 
-import numpy as np
-from keras import optimizers
 from keras.layers import Input, Add, Dense, Activation, ZeroPadding2D
 from keras.layers import BatchNormalization, Flatten, Conv2D, AveragePooling2D
 from keras.layers import MaxPooling2D
