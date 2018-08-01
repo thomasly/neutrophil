@@ -27,7 +27,8 @@ class LossHistory(Callback):
         self.epoch_filename = epoch_filename
         self.batch_filename = batch_filename
         self.append = append
-        self.writer = None
+        self.batch_writer = None
+        self.epoch_writer = None
         self.keys = None
         self.append_header = True
         self.file_flags = 'b' if six.PY2 and os.name == 'nt' else ''
@@ -74,18 +75,18 @@ class LossHistory(Callback):
             # We set NA so that csv parsers do not fail for this last epoch.
             logs = dict([(k, logs[k]) if k in logs else (k, 'NA') for k in self.keys])
 
-        if not self.writer:
+        if not self.epoch_writer:
             class CustomDialect(csv.excel):
                 delimiter = self.sep
 
-            self.writer = csv.DictWriter(self.epoch_csv_file,
+            self.epoch_writer = csv.DictWriter(self.epoch_csv_file,
                                          fieldnames=['epoch'] + self.keys, dialect=CustomDialect)
             if self.append_header:
-                self.writer.writeheader()
+                self.epoch_writer.writeheader()
 
         row_dict = OrderedDict({'epoch': epoch})
         row_dict.update((key, handle_value(logs[key])) for key in self.keys)
-        self.writer.writerow(row_dict)
+        self.epoch_writer.writerow(row_dict)
         self.epoch_csv_file.flush()
         
 
@@ -108,23 +109,25 @@ class LossHistory(Callback):
             # We set NA so that csv parsers do not fail for this last epoch.
             logs = dict([(k, logs[k]) if k in logs else (k, 'NA') for k in self.keys])
 
-        if not self.writer:
+        if not self.batch_writer:
             class CustomDialect(csv.excel):
                 delimiter = self.sep
 
-            self.writer = csv.DictWriter(self.batch_csv_file,
+            self.batch_writer = csv.DictWriter(self.batch_csv_file,
                                          fieldnames=['epoch'] + ['batch_total'] + self.keys, dialect=CustomDialect)
             if self.append_header:
-                self.writer.writeheader()
+                self.batch_writer.writeheader()
         
         n_batch = self.params['steps'] * self.epoch + batch
         row_dict = OrderedDict({'epoch': self.epoch, 'batch_total': n_batch})
         row_dict.update((key, handle_value(logs[key])) for key in self.keys)
-        self.writer.writerow(row_dict)
+        self.batch_writer.writerow(row_dict)
         self.batch_csv_file.flush()
         
 
     def on_train_end(self, logs=None):
         self.epoch_csv_file.close()
         self.batch_csv_file.close()
-        self.writer = None
+        self.epoch_writer = None
+        self.batch_writer = None
+        
