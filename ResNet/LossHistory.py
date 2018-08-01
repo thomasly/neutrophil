@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
 
-from keras.callbacks import CSVLogger
+from keras.callbacks import Callback
 import six, csv, os
 import numpy as np
 from collections import Iterable, OrderedDict
 
-class LossHistory(CSVLogger):
+class LossHistory(Callback):
     """Callback that streams batch results to a csv file.
     Supports all values that can be represented as a string,
     including 1D iterables such as np.ndarray.
@@ -30,7 +30,7 @@ class LossHistory(CSVLogger):
         self.keys = None
         self.append_header = True
         self.file_flags = 'b' if six.PY2 and os.name == 'nt' else ''
-        super(CSVLogger, self).__init__()
+        super(Callback, self).__init__()
         
 
     def on_train_begin(self, logs=None):
@@ -44,6 +44,11 @@ class LossHistory(CSVLogger):
             
     def on_epoch_begin(self, epoch, logs=None):
         self.epoch = epoch
+        
+        
+    def on_epoch_end(self, epoch, logs=None):
+        pass
+
 
     def on_batch_end(self, batch, logs=None):
         logs = logs or {}
@@ -74,7 +79,7 @@ class LossHistory(CSVLogger):
                 self.writer.writeheader()
         
         n_batch = self.params['steps'] * self.epoch + batch
-        row_dict = OrderedDict({'epoch': self.epoch, 'batch': n_batch})
+        row_dict = OrderedDict({'epoch': self.epoch, 'batch_total': n_batch})
         row_dict.update((key, handle_value(logs[key])) for key in self.keys)
         self.writer.writerow(row_dict)
         self.csv_file.flush()
