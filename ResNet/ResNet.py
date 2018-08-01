@@ -143,7 +143,7 @@ def ResNet50(input_shape = (299, 299, 3), classes = 1):
 
 
     # Maxpooling added by Yang Liu
-    # X = MaxPooling2D((3,3), strides = (3, 3))(X_input)
+    # X = MaxPooling2D((3,3), strides = (2, 2))(X_input)
 
     
     # Zero-Padding
@@ -175,6 +175,8 @@ def ResNet50(input_shape = (299, 299, 3), classes = 1):
     X = identity_block(X, f = 3, filters = [256, 256, 1024], stage = 4, block = 'd')
     X = identity_block(X, f = 3, filters = [256, 256, 1024], stage = 4, block = 'e')
     X = identity_block(X, f = 3, filters = [256, 256, 1024], stage = 4, block = 'f')
+    
+    X = MaxPooling2D((3, 3), strides = (1, 1), padding='same', name = "max_pool")(X)
 
     # Stage 5 (≈3 lines)
     X = convolutional_block(X, f = 3, filters = [512, 512, 2048], stage = 5, block = 'a', s = 2)
@@ -182,7 +184,7 @@ def ResNet50(input_shape = (299, 299, 3), classes = 1):
     X = identity_block(X, f = 3, filters = [512, 512, 2048], stage = 5, block = 'c')
 
     # AVGPOOL (≈1 line). Use "X = AveragePooling2D(...)(X)"
-    X = AveragePooling2D(pool_size=(2, 2), name = "avg_pool")(X)
+    X = AveragePooling2D((3, 3), strides = (2, 2), name = "avg_pool")(X)
     
     ### END CODE HERE ###
 
