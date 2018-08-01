@@ -105,7 +105,7 @@ def train_resnet(new_model = False, batch_size = 32, epochs = 20):
     
 def main():
     try:
-        train_resnet(sys.argv[1], sys.argv[2], sys.argv[3])
+        train_resnet(sys.argv[1], int(sys.argv[2]), int(sys.argv[3]))
     except IndexError:
         train_resnet(new_model=False)
     
