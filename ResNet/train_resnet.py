@@ -55,7 +55,7 @@ def train_resnet(
         model = ResNet50()
         
     else:
-        model = load_model(ResNet50.h5)
+        model = load_model('ResNet50.h5')
         
     model.compile(
             optimizer = "adam", 
