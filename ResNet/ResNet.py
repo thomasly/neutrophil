@@ -143,11 +143,11 @@ def ResNet50(input_shape = (299, 299, 3), classes = 1):
 
 
     # Maxpooling added by Yang Liu
-    # X = MaxPooling2D((3,3), strides = (2, 2))(X_input)
+    X = MaxPooling2D((3,3), strides = (2, 2))(X_input)
 
     
     # Zero-Padding
-    X = ZeroPadding2D((3, 3))(X_input)
+    X = ZeroPadding2D((3, 3))(X)
     
     # Stage 1
     X = Conv2D(64, (7, 7), strides = (2, 2), name = 'conv1', kernel_initializer = glorot_uniform())(X)
