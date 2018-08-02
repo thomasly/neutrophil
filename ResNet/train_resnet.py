@@ -3,7 +3,7 @@
 from ResNet import ResNet50
 from read_hdf5 import read_hdf5
 import os, sys, h5py
-from keras.models import model_from_json
+from keras.models import model_from_json, load_model
 from math import ceil
 from datetime import datetime
 from LossHistory import LossHistory
@@ -55,16 +55,7 @@ def train_resnet(
         model = ResNet50()
         
     else:
-        # model_path = os.path.join(".", "resModel.json")
-        weights_path = os.path.join(".", "modelWeights.h5")
-#        with open(model_path, "r") as f:
-#            json = f.read()
-
-        # load model
-        model = ResNet50()
-        # add weights to the model
-        print("Load trained weights.")
-        model.load_weights(weights_path)
+        model = load_model(ResNet50.h5)
         
     model.compile(
             optimizer = "adam", 
