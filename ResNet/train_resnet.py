@@ -55,7 +55,16 @@ def train_resnet(
         model = ResNet50()
         
     else:
-        model = load_model_from_json()
+        # model_path = os.path.join(".", "resModel.json")
+        weights_path = os.path.join(".", "modelWeights.h5")
+#        with open(model_path, "r") as f:
+#            json = f.read()
+
+        # load model
+        model = ResNet50()
+        # add weights to the model
+        print("Load trained weights.")
+        model.load_weights(weights_path)
         
     model.compile(
             optimizer = "adam", 
