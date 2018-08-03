@@ -6,6 +6,28 @@ import os, h5py, glob
 import numpy as np
 from datetime import datetime
 from PIL import Image
+import multiprocessing as mp
+
+def v_slide(start_point, bound_y, scn_file, tile_path):
+    """
+    """
+    
+    STD_THRESHOLD = 40
+    while start_point[1] < bound_y:
+        img = scn_file.read_region(start_point, 0, (299, 299))
+        std = np.std(img)
+        if std < STD_THRESHOLD:
+            print("Center position: ({}, {}). \
+Background region!".format(
+                  start_point[0], 
+                  start_point[1]))
+        else:
+            sufix = "_" + str(start_point[0]) + "_" + \
+                    str(start_point[1]) + ".png"
+            file_name = "scn80" + sufix
+            img.save(os.path.join(tile_path, file_name))  
+        start_point[1] += 150
+    
 
 def slide_scn(scn_file=None):
     """
@@ -23,8 +45,11 @@ def slide_scn(scn_file=None):
         try:
             scn_file = OpenSlide(file_path)
             
-        except (OpenSlideUnsupportedFormatError, OpenSlideError):
-            print("Error occured.")
+        except OpenSlideUnsupportedFormatError:
+            print("OpenSlideUnsupportedFormatError!")
+            return
+        except OpenSlideError:
+            print("OpenSlideError!")
             return
         
     x0 = int(scn_file.properties["openslide.bounds-x"])
@@ -35,25 +60,24 @@ def slide_scn(scn_file=None):
     bound_y = y0 + height - 150
     start_point = [x0 + 150, y0 + 150]
     
+    pool = mp.Pool(mp.cpu_count())
+    tasks = []
     while start_point[0] < bound_x:
-        while start_point[1] < bound_y:
-            img = scn_file.read_region(start_point, 0, (299, 299))
-            std = np.std(img)
-            if std < 15:
-                print("Center position: ({}, {}). Std too low!".format(start_point[0], start_point[1]))
-            else:
-                sufix = "_" + str(start_point[0]) + "_" + str(start_point[1]) + ".png"
-                file_name = "scn80" + sufix
-                img.save(os.path.join(tile_path, file_name))  
-            start_point[1] += 150
-        start_point[1] = x0 + 150
+        tasks.append(list([start_point[0], start_point[1]]))
         start_point[0] += 150
+        
+    for t in tasks:
+        mp.apply_async(v_slide, [t, bound_y, scn_file, tile_path])
+        
+    pool.close()
+    pool.join()
     
     scn_file.close()
     print("Done!")
     print("Time consumed: {}".format(datetime.now() - start_time))
     
-    hdf5_file = h5py.File(tile_path, mode = 'w')
+    h5_file_path = os.path.join(tile_path, "pred_img.hdf5")
+    hdf5_file = h5py.File(h5_file_path, mode = 'w')
     files = glob.glob(tile_path + os.sep + "*.png")
     n_files = len(files)
     
