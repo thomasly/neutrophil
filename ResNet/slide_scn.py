@@ -8,9 +8,14 @@ from datetime import datetime
 from PIL import Image
 import multiprocessing as mp
 
-def v_slide(start_point, bound_y, scn_file, tile_path):
+def v_slide(params):
     """
     """
+    
+    start_point = params["start_point"]
+    bound_y =  params["bound_y"]
+    scn_file = params["scn_file"]
+    tile_path = params["tile_path"]
     
     STD_THRESHOLD = 40
     while start_point[1] < bound_y:
@@ -62,12 +67,17 @@ def slide_scn(scn_file=None):
     
     pool = mp.Pool(mp.cpu_count())
     tasks = []
+    task = {
+            "bound_y": bound_y,
+            "scn_file": scn_file,
+            "tile_path": tile_path
+            }
     while start_point[0] < bound_x:
-        tasks.append(list([start_point[0], start_point[1]]))
+        task["start_point"] = list([start_point[0], start_point[1]])
+        tasks.append(dict(task))
         start_point[0] += 150
         
-    for t in tasks:
-        mp.apply_async(v_slide, [t, bound_y, scn_file, tile_path])
+    pool.map(v_slide, tasks)
         
     pool.close()
     pool.join()
