@@ -11,10 +11,25 @@ import multiprocessing as mp
 def v_slide(params):
     """
     """
+    home_path = os.path.abspath("..")
+    file_path = os.path.join(
+            home_path, 
+            "data", 
+            "orig", 
+            "ImageCollection_80.scn")
+
+    try:
+        scn_file = OpenSlide(file_path)
+        
+    except OpenSlideUnsupportedFormatError:
+        print("OpenSlideUnsupportedFormatError!")
+        return
+    except OpenSlideError:
+        print("OpenSlideError!")
+        return
     
     start_point = params["start_point"]
     bound_y =  params["bound_y"]
-    scn_file = params["scn_file"]
     tile_path = params["tile_path"]
     
     STD_THRESHOLD = 40
@@ -32,6 +47,8 @@ Background region!".format(
             file_name = "scn80" + sufix
             img.save(os.path.join(tile_path, file_name))  
         start_point[1] += 150
+        
+    scn_file.close()
     
 
 def slide_scn(scn_file=None):
@@ -69,7 +86,6 @@ def slide_scn(scn_file=None):
     tasks = []
     task = {
             "bound_y": bound_y,
-            "scn_file": scn_file,
             "tile_path": tile_path
             }
     while start_point[0] < bound_x:
