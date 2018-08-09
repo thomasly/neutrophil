@@ -11,44 +11,48 @@ import multiprocessing as mp
 def v_slide(params):
     """
     """
-    home_path = os.path.abspath("..")
-    file_path = os.path.join(
-            home_path, 
-            "data", 
-            "orig", 
-            "ImageCollection_80.scn")
-
     try:
-        scn_file = OpenSlide(file_path)
+        home_path = os.path.abspath("..")
+        file_path = os.path.join(
+                home_path, 
+                "data", 
+                "orig", 
+                "ImageCollection_80.scn")
+
+        try:
+            scn_file = OpenSlide(file_path)
+            
+        except OpenSlideUnsupportedFormatError:
+            print("OpenSlideUnsupportedFormatError!")
+            return
+        except OpenSlideError:
+            print("OpenSlideError!")
+            return
         
-    except OpenSlideUnsupportedFormatError:
-        print("OpenSlideUnsupportedFormatError!")
-        return
-    except OpenSlideError:
-        print("OpenSlideError!")
-        return
-    
-    start_point = params["start_point"]
-    bound_y =  params["bound_y"]
-    tile_path = params["tile_path"]
-    
-    STD_THRESHOLD = 40
-    while start_point[1] < bound_y:
-        img = scn_file.read_region(start_point, 0, (299, 299))
-        std = np.std(img)
-        if std < STD_THRESHOLD:
-            print("Center position: ({}, {}). \
-Background region!".format(
-                  start_point[0], 
-                  start_point[1]))
-        else:
-            sufix = "_" + str(start_point[0]) + "_" + \
-                    str(start_point[1]) + ".png"
-            file_name = "scn80" + sufix
-            img.save(os.path.join(tile_path, file_name))  
-        start_point[1] += 150
+        start_point = params["start_point"]
+        bound_y =  params["bound_y"]
+        tile_path = params["tile_path"]
         
-    scn_file.close()
+        STD_THRESHOLD = 40
+        pid = os.getpid()
+        counter = 0
+        while start_point[1] < bound_y:
+            img = scn_file.read_region(start_point, 0, (299, 299))
+            std = np.std(img)
+            if std < STD_THRESHOLD:
+                counter += 1
+                if counter % 200 == 0:
+                    print("{}: {} empty tiles discarded.".format(pid, counter))
+            else:
+                sufix = "_" + str(start_point[0]) + "_" + \
+                        str(start_point[1]) + ".png"
+                file_name = "scn80" + sufix
+                img.save(os.path.join(tile_path, file_name))  
+            start_point[1] += 150
+
+    finally:
+        print("{}: scn file closed".format(pid))
+        scn_file.close()
     
 
 def slide_scn(scn_file=None):
@@ -81,6 +85,7 @@ def slide_scn(scn_file=None):
     bound_x = x0 + width - 150
     bound_y = y0 + height - 150
     start_point = [x0 + 150, y0 + 150]
+    scn_file.close()
     
     pool = mp.Pool(mp.cpu_count())
     tasks = []
@@ -97,8 +102,7 @@ def slide_scn(scn_file=None):
         
     pool.close()
     pool.join()
-    
-    scn_file.close()
+
     print("Done!")
     print("Time consumed: {}".format(datetime.now() - start_time))
     
