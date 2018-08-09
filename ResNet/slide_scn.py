@@ -2,20 +2,16 @@
 
 from openslide import OpenSlide
 from openslide import OpenSlideUnsupportedFormatError, OpenSlideError
-import os
+import os, time
 import tables as tb
 import numpy as np
 from datetime import datetime
 import multiprocessing as mp
 
-hdf5_file_path = os.path.join(os.path.abspath(".."), 'data', 'test', 'tiles_80.hdf5')
-hdf5_file = tb.open_file(hdf5_file_path, mode='w')
-img_storage = hdf5_file.create_earray(hdf5_file.root, "pred_img", tb.UInt8Atom(), shape=(0, 299, 299, 3))
-label_storage = hdf5_file.create_earray(hdf5_file.root, "pred_region_label", tb.StringCol(25), shape=(0, 1))
-
 def v_slide(params):
     """
     """
+    
     try:
         home_path = os.path.abspath("..")
         file_path = os.path.join(
@@ -35,37 +31,79 @@ def v_slide(params):
             return
         
         start_point = params["start_point"]
+        x0 = start_point[0]
+        y0 = start_point[1]
         bound_y =  params["bound_y"]
         tile_path = params["tile_path"]
         save_tiles = params["save_tiles"]
+        q = params["queue"]
         
         STD_THRESHOLD = 40
         pid = os.getpid()
-        counter = 0
-        while start_point[1] < bound_y:
-            img = scn_file.read_region(start_point, 0, (299, 299))
+        data = {}
+        while y0 < bound_y:
+            img = scn_file.read_region((x0, y0), 0, (299, 299))
             std = np.std(img)
-            if std < STD_THRESHOLD:
-                counter += 1
-                if counter % 200 == 0:
-                    print("{}: {} empty tiles discarded.".format(pid, counter))
-            else:
-                sufix = "_" + str(start_point[0]) + "_" + \
-                        str(start_point[1]) + ".png"
+            if std > STD_THRESHOLD:
+                sufix = "_" + str(x0) + "_" + \
+                        str(y0) + ".png"
                 file_name = "scn80" + sufix
                 img = np.array(img)
                 img = img[:, :, 0:3]
-                img_storage.append(img)
-                label_storage.append(file_name)
+                data['pred'] = img
+                data['xlabel'] = np.array([x0])
+                data['ylabel'] = np.array([y0])
+                q.put(dict(data))
                 if save_tiles:
-                    img.save(os.path.join(tile_path, file_name))  
-            start_point[1] += 150
-
+                    img.save(os.path.join(tile_path, file_name))
+                    
+            y0 += 150
+        
+        return pid
     finally:
-        print("{}: scn file closed".format(pid))
         scn_file.close()
     
-
+def listener(q):
+    """
+    """
+    try:
+        counter = 0
+        pid = os.getpid()
+        print("Listener running on {}".format(pid))
+        home_path = os.path.abspath('..')
+        hdf5_path = os.path.join(home_path, "data", "test", "tiles_80.hdf5")
+        hdf5_file = tb.open_file(hdf5_path, mode='w')
+        pred_storage = hdf5_file.create_earray(hdf5_file.root, 
+                                               "pred_img", 
+                                               tb.UInt8Atom(), 
+                                               shape=(0, 299, 299, 3))
+        xlabel_storage = hdf5_file.create_earray(hdf5_file.root, 
+                                                 "pos_xlabel", 
+                                                 tb.UInt16Atom(), 
+                                                 shape=(0,1))
+        ylabel_storage = hdf5_file.create_earray(hdf5_file.root, 
+                                                 "pos_ylabel", 
+                                                 tb.UInt16Atom(), 
+                                                 shape=(0,1))
+        
+        while 1:
+            counter += 1
+            if counter % 100 == 0:
+                print("{} tiles saved in hdf5.".format(counter), end = "\r")
+            data = q.get()
+            if data == 'kill':
+                print("Listner closed.")
+                break
+            pred = data['pred']
+            xlabel = data['xlabel']
+            ylabel = data['ylabel']
+            
+            pred_storage.append(pred[None])
+            xlabel_storage.append(xlabel[None])
+            ylabel_storage.append(ylabel[None])
+    finally:
+        hdf5_file.close()
+    
 def slide_scn(scn_file=None, save_tiles=False):
     """
     Slide the whole scn file into tiles. Tiles sizes are (299, 299). 
@@ -87,10 +125,10 @@ def slide_scn(scn_file=None, save_tiles=False):
     
     # to get the running time
     start_time = datetime.now()
-    home_path = os.path.abspath("..")
     
     # default scn file path, should be replaced with sys.argv 
     # when the project is done.
+    home_path = os.path.abspath("..")
     file_path = os.path.join(
             home_path, 
             "data", 
@@ -133,13 +171,17 @@ def slide_scn(scn_file=None, save_tiles=False):
     
     # create multiporcessing pool
     pool = mp.Pool(mp.cpu_count())
+    manager = mp.Manager()
+    q = manager.Queue()
+    watcher = pool.apply_async(listener, (q, ))
     
     # parameters passed to pool.map() function need to be packed in a list
     tasks = []
     task = {
             "bound_y": bound_y,
             "tile_path": tile_path,
-            "save_tiles": save_tiles
+            "save_tiles": save_tiles,
+            "queue": q
             }
     while start_point[0] < bound_x:
         task["start_point"] = list([start_point[0], start_point[1]])
@@ -147,15 +189,22 @@ def slide_scn(scn_file=None, save_tiles=False):
         start_point[0] += 150
     
     # slide images with multiprocessing
-    pool.map(v_slide, tasks)
+    jobs = []
+    start_watch = True
+    for task in tasks:
+        job = pool.apply_async(v_slide, (task, ))
+        jobs.append(job)
         
+    for job in jobs:
+        job.get()
+        if start_watch:
+            start_watch = False
+            watcher.get()
+    
+    q.put('kill')
     pool.close()
-    pool.join()
-
     print("Done!")
     print("Time consumed: {}".format(datetime.now() - start_time))
-    
-    hdf5_file.close()
     
 #    h5_file_path = os.path.join(tile_path, "pred_img.hdf5")
 #    hdf5_file = h5py.File(h5_file_path, mode = 'w')

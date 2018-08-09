@@ -8,7 +8,6 @@
 
 from keras.models import model_from_json
 import os
-from numpy import squeeze
 
 def load_model_from_json(model_path=None, weights_path=None):
     """
