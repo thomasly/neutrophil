@@ -3,6 +3,7 @@
 import os, h5py
 from math import ceil
 from ResNetFromFile import load_model_from_json
+import numpy as np
 
 def read_hdf5(hdf5_file, dataset="train", batch_size=32, epochs=1):
     """
@@ -25,6 +26,7 @@ def pred(hdf5_file_path=None):
     """
     BATCH_SIZE = 32
     model = load_model_from_json()
+    model.compile(optimizer='adam', loss='binary_crossentropy')
     home = os.path.abspath("..")
     default_path = os.path.join(home, 'data', 'test', 'pred_img.hdf5')
     if hdf5_file_path:
@@ -36,12 +38,12 @@ def pred(hdf5_file_path=None):
     m_samples = hdf5_file["pred_img"].shape[0]
     steps = int(ceil(m_samples / BATCH_SIZE))
     generator = read_hdf5(hdf5_file, dataset="pred", batch_size=BATCH_SIZE)
-    preds = model.predict_generator(generator, steps=steps)
+    preds = model.predict_generator(generator, steps=steps, verbose=2)
     
     hdf5_file.close()
     
     csv_path = os.path.join(home, 'data', 'test', 'preds.csv')
-    preds.savetxt(csv_path, delimiter=',')
+    np.savetxt(csv_path, preds, delimiter=',')
     
 
 if __name__ == "__main__":
