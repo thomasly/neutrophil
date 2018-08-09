@@ -46,6 +46,11 @@ def pred(hdf5_file_path=None):
         csv_path = os.path.join(home, 'data', 'test', 'preds.csv')
         np.savetxt(csv_path, preds, delimiter=',')
         
+        y = np.bincount(pred)
+        ii = np.nonzero(y)[0]
+        result = zip(ii, y[ii])
+        print(result)
+        
     finally:
         hdf5_file.close()
     

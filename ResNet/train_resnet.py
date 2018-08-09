@@ -81,7 +81,7 @@ def train_resnet(
                         ), 
                 steps_per_epoch = steps_per_epoch,
                 epochs = epochs,
-                verbose = 2, 
+                verbose = 1, 
                 callbacks = [history],
                 validation_data = read_hdf5(
                         hdf5_file, 

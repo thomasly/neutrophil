@@ -2,12 +2,16 @@
 
 from openslide import OpenSlide
 from openslide import OpenSlideUnsupportedFormatError, OpenSlideError
-import os, h5py, glob
+import os
 import tables as tb
 import numpy as np
 from datetime import datetime
-from PIL import Image
 import multiprocessing as mp
+
+hdf5_file_path = os.path.join(os.path.abspath(".."), 'data', 'test', 'tiles_80.hdf5')
+hdf5_file = tb.open_file(hdf5_file_path, mode='w')
+img_storage = hdf5_file.create_earray(hdf5_file.root, "pred_img", tb.UInt8Atom(), shape=(0, 299, 299, 3))
+label_storage = hdf5_file.create_earray(hdf5_file.root, "pred_region_label", tb.StringCol(25), shape=(0, 1))
 
 def v_slide(params):
     """
@@ -46,10 +50,14 @@ def v_slide(params):
                 if counter % 200 == 0:
                     print("{}: {} empty tiles discarded.".format(pid, counter))
             else:
+                sufix = "_" + str(start_point[0]) + "_" + \
+                        str(start_point[1]) + ".png"
+                file_name = "scn80" + sufix
+                img = np.array(img)
+                img = img[:, :, 0:3]
+                img_storage.append(img)
+                label_storage.append(file_name)
                 if save_tiles:
-                    sufix = "_" + str(start_point[0]) + "_" + \
-                            str(start_point[1]) + ".png"
-                    file_name = "scn80" + sufix
                     img.save(os.path.join(tile_path, file_name))  
             start_point[1] += 150
 
@@ -147,30 +155,32 @@ def slide_scn(scn_file=None, save_tiles=False):
     print("Done!")
     print("Time consumed: {}".format(datetime.now() - start_time))
     
-    h5_file_path = os.path.join(tile_path, "pred_img.hdf5")
-    hdf5_file = h5py.File(h5_file_path, mode = 'w')
-    files = glob.glob(tile_path + os.sep + "*.png")
-    n_files = len(files)
-    
-    shape = (n_files, 299, 299, 3)
-    
-    hdf5_file.create_dataset("pred_img", shape, np.int8)
-    
-    for i in range(n_files):
-        if i % 500 == 0 and i > 1:
-            print("Tiles: {}/{}".format(i, n_files))
-            
-        x = files[i]
-        img = Image.open(x)
-        img = np.array(img)
-        img = img[:, :, 0:3]
-        hdf5_file["pred_img"][i, ...] = img
-        
     hdf5_file.close()
+    
+#    h5_file_path = os.path.join(tile_path, "pred_img.hdf5")
+#    hdf5_file = h5py.File(h5_file_path, mode = 'w')
+#    files = glob.glob(tile_path + os.sep + "*.png")
+#    n_files = len(files)
+#    
+#    shape = (n_files, 299, 299, 3)
+#    
+#    hdf5_file.create_dataset("pred_img", shape, np.int8)
+#    
+#    for i in range(n_files):
+#        if i % 500 == 0 and i > 1:
+#            print("Tiles: {}/{}".format(i, n_files))
+#            
+#        x = files[i]
+#        img = Image.open(x)
+#        img = np.array(img)
+#        img = img[:, :, 0:3]
+#        hdf5_file["pred_img"][i, ...] = img
+#        
+#    hdf5_file.close()
     
     
     
     
             
 if __name__ == "__main__":
-    slide_scn(save_tiles=True)
+    slide_scn(save_tiles=False)

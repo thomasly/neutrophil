@@ -1,5 +1,5 @@
 # .DS_Store file
-*.DS_Store
+.DS_Store
 
 # data
 data/
@@ -215,3 +215,7 @@ venv.bak/
 # mypy
 
 .mypy_cache/
+
+# playground folder
+
+sandbox/
