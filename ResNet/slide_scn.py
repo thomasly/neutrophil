@@ -2,7 +2,7 @@
 
 from openslide import OpenSlide
 from openslide import OpenSlideUnsupportedFormatError, OpenSlideError
-import os, time
+import os
 import tables as tb
 import numpy as np
 from datetime import datetime
@@ -93,7 +93,7 @@ def listener(q):
             data = q.get()
             if data == 'kill':
                 print("Listner closed.")
-                break
+                return None
             pred = data['pred']
             xlabel = data['xlabel']
             ylabel = data['ylabel']
@@ -101,8 +101,10 @@ def listener(q):
             pred_storage.append(pred[None])
             xlabel_storage.append(xlabel[None])
             ylabel_storage.append(ylabel[None])
+    
     finally:
         hdf5_file.close()
+        
     
 def slide_scn(scn_file=None, save_tiles=False):
     """
@@ -173,6 +175,8 @@ def slide_scn(scn_file=None, save_tiles=False):
     pool = mp.Pool(mp.cpu_count())
     manager = mp.Manager()
     q = manager.Queue()
+    
+    # run the listener
     watcher = pool.apply_async(listener, (q, ))
     
     # parameters passed to pool.map() function need to be packed in a list
@@ -190,18 +194,20 @@ def slide_scn(scn_file=None, save_tiles=False):
     
     # slide images with multiprocessing
     jobs = []
-    start_watch = True
     for task in tasks:
         job = pool.apply_async(v_slide, (task, ))
         jobs.append(job)
-        
+    
+    start_watch = True
     for job in jobs:
         job.get()
         if start_watch:
             start_watch = False
             watcher.get()
     
+    # kill listener
     q.put('kill')
+    print("killer sent.")
     pool.close()
     print("Done!")
     print("Time consumed: {}".format(datetime.now() - start_time))
