@@ -3,6 +3,7 @@
 from openslide import OpenSlide
 from openslide import OpenSlideUnsupportedFormatError, OpenSlideError
 import os, h5py, glob
+import tables as tb
 import numpy as np
 from datetime import datetime
 from PIL import Image
@@ -32,6 +33,7 @@ def v_slide(params):
         start_point = params["start_point"]
         bound_y =  params["bound_y"]
         tile_path = params["tile_path"]
+        save_tiles = params["save_tiles"]
         
         STD_THRESHOLD = 40
         pid = os.getpid()
@@ -44,10 +46,11 @@ def v_slide(params):
                 if counter % 200 == 0:
                     print("{}: {} empty tiles discarded.".format(pid, counter))
             else:
-                sufix = "_" + str(start_point[0]) + "_" + \
-                        str(start_point[1]) + ".png"
-                file_name = "scn80" + sufix
-                img.save(os.path.join(tile_path, file_name))  
+                if save_tiles:
+                    sufix = "_" + str(start_point[0]) + "_" + \
+                            str(start_point[1]) + ".png"
+                    file_name = "scn80" + sufix
+                    img.save(os.path.join(tile_path, file_name))  
             start_point[1] += 150
 
     finally:
@@ -55,18 +58,41 @@ def v_slide(params):
         scn_file.close()
     
 
-def slide_scn(scn_file=None):
+def slide_scn(scn_file=None, save_tiles=False):
     """
+    Slide the whole scn file into tiles. Tiles sizes are (299, 299). 
+    Tiles have a half of the tile width overlapping with the tiles beside them
+    to ensure all regions are well covered without neutrophil locating on the 
+    side of the tiles to be ignored in the later prediction.
+    The function use multiprocessing method to increase sliding speed.
+    Tiles are saved into hdf5 file after sliding.
+    
+    input:
+        scn_file - path to scn file
+        save_tiles - save tiles images or not
+        
+    output:
+        hdf5 file saved in neutrophil/data/test folder.
+        Label name is "pred_img".
+        Tiles will be saved in the save folder if save_tiles flag is set to True.
     """
     
+    # to get the running time
     start_time = datetime.now()
     home_path = os.path.abspath("..")
+    
+    # default scn file path, should be replaced with sys.argv 
+    # when the project is done.
     file_path = os.path.join(
             home_path, 
             "data", 
             "orig", 
             "ImageCollection_80.scn")
+    
+    # path to the folder saving tiles and hdf5 file.
     tile_path = os.path.join(home_path, "data", "test")
+    
+    # open scn_file
     if not scn_file:
         try:
             scn_file = OpenSlide(file_path)
@@ -77,7 +103,17 @@ def slide_scn(scn_file=None):
         except OpenSlideError:
             print("OpenSlideError!")
             return
-        
+    else:
+        try:
+            scn_file = OpenSlide(scn_file)
+            
+        except OpenSlideUnsupportedFormatError:
+            print("OpenSlideUnsupportedFormatError!")
+            return
+        except OpenSlideError:
+            print("OpenSlideError!")
+    
+    # get attributes of the scn_file
     x0 = int(scn_file.properties["openslide.bounds-x"])
     y0 = int(scn_file.properties["openslide.bounds-y"])
     width = int(scn_file.properties["openslide.bounds-width"])
@@ -87,17 +123,22 @@ def slide_scn(scn_file=None):
     start_point = [x0 + 150, y0 + 150]
     scn_file.close()
     
+    # create multiporcessing pool
     pool = mp.Pool(mp.cpu_count())
+    
+    # parameters passed to pool.map() function need to be packed in a list
     tasks = []
     task = {
             "bound_y": bound_y,
-            "tile_path": tile_path
+            "tile_path": tile_path,
+            "save_tiles": save_tiles
             }
     while start_point[0] < bound_x:
         task["start_point"] = list([start_point[0], start_point[1]])
         tasks.append(dict(task))
         start_point[0] += 150
-        
+    
+    # slide images with multiprocessing
     pool.map(v_slide, tasks)
         
     pool.close()
@@ -132,4 +173,4 @@ def slide_scn(scn_file=None):
     
             
 if __name__ == "__main__":
-    slide_scn()
+    slide_scn(save_tiles=True)

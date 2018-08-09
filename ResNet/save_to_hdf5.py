@@ -10,6 +10,7 @@ import h5py, os, glob
 from PIL import Image
 import numpy as np
 from random import shuffle
+import tables as tb
 
 def save_to_hdf5(path):
     """
@@ -98,7 +99,7 @@ def save_to_hdf5(path):
         
     hdf5_file["train_mean"][...] = mean
     hdf5_file.close()
-        
+    
 
 if __name__ == "__main__":
     import timeit
