@@ -77,7 +77,6 @@ def train_resnet(
                 read_hdf5(
                         hdf5_file, 
                         batch_size = batch_size,
-                        epochs = epochs
                         ), 
                 steps_per_epoch = steps_per_epoch,
                 epochs = epochs,
@@ -87,7 +86,6 @@ def train_resnet(
                         hdf5_file, 
                         dataset = "test", 
                         batch_size = batch_size,
-                        epochs = epochs
                         ),
                 validation_steps = validation_steps
                 )
@@ -104,6 +102,10 @@ def train_resnet(
         hdf5_file.close()
 
     except StopIteration:
+        
+        hdf5_file.close()
+        
+    finally:
         
         hdf5_file.close()
         
