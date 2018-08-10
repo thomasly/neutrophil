@@ -10,6 +10,11 @@ pos/
 batches/
 testSets/
 
+# Neural network model file
+
+resModel.json
+modelWeights.h5
+
 # Byte-compiled / optimized / DLL files
 
 __pycache__/
