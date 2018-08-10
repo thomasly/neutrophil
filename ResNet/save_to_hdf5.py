@@ -129,30 +129,24 @@ def save_to_hdf5_with_tables(path):
     y_test = labels[part_train : part_test]
     y_val = labels[part_test : ]
     
-    train_shape = (0, 299, 299, 3)
-    test_shape = (0, 299, 299, 3)
-    val_shape = (0, 299, 299, 3)
+    data_shape = (0, 299, 299, 3)
     
     hdf5_file = tb.open_file(des_path, mode = 'w')
     m_train = len(x_train)
     m_test = len(x_test)
     m_val = len(x_val)
     
-    hdf5_file.create_earray(hdf5_file.root, "train_img", train_shape, tb.UInt16Atom())
-    hdf5_file.create_earray(hdf5_file.root, "test_img", test_shape, tb.UInt16Atom())
-    hdf5_file.create_earray(hdf5_file.root, "val_img", val_shape, tb.UInt16Atom())
+    train_storage = hdf5_file.create_earray(hdf5_file.root, "train_img", tb.UInt16Atom(), shape=data_shape)
+    test_storage = hdf5_file.create_earray(hdf5_file.root, "test_img", tb.UInt16Atom(), shape=data_shape)
+    val_storage = hdf5_file.create_earray(hdf5_file.root, "val_img", tb.UInt16Atom(), shape=data_shape)
     
-    hdf5_file.create_dataset("train_labels", (m_train,), np.int16)
-    hdf5_file.create_dataset("test_labels", (m_test,), np.int16)
-    hdf5_file.create_dataset("val_labels", (m_val,), np.int16)
+    hdf5_file.create_array(hdf5_file.root, "train_labels", y_train)
+    hdf5_file.create_array(hdf5_file.root, "test_labels", y_test)
+    hdf5_file.create_array(hdf5_file.root, "val_labels", y_val)
     
-    hdf5_file.create_dataset("train_mean", train_shape[1:], np.float32)
+    mean_storage = hdf5_file.create_earray(hdf5_file.root, "train_mean", tb.UInt16Atom(), shape=data_shape)
     
-    hdf5_file["train_labels"][...] = y_train
-    hdf5_file["test_labels"][...] = y_test
-    hdf5_file["val_labels"][...] = y_val
-    
-    mean = np.zeros(train_shape[1:], np.float32)
+    mean = np.zeros(data_shape[1:], np.float32)
   
     
     for i in range(m_train):
@@ -163,7 +157,7 @@ def save_to_hdf5_with_tables(path):
         img = Image.open(x)
         img = np.array(img)
         img = img[:, :, 0:3]
-        hdf5_file["train_img"][i, ...] = img
+        train_storage.append(img[None])
         mean += img / float(m_train)
         
     for i in range(m_test):
@@ -174,7 +168,7 @@ def save_to_hdf5_with_tables(path):
         img = Image.open(x)
         img = np.array(img)
         img = img[:, :, 0:3]
-        hdf5_file["test_img"][i, ...] = img
+        test_storage.append(img[None])
     
     for i in range(m_val):
         if i % 100 == 0 and i > 1:
@@ -184,9 +178,9 @@ def save_to_hdf5_with_tables(path):
         img = Image.open(x)
         img = np.array(img)
         img = img[:, :, 0:3]
-        hdf5_file["val_img"][i, ...] = img
+        val_storage.append(img[None])
         
-    hdf5_file["train_mean"][...] = mean
+    mean_storage.append(mean[None])
     hdf5_file.close()
     
 
@@ -195,7 +189,7 @@ if __name__ == "__main__":
     start_time = timeit.default_timer()
     home = os.path.abspath("..")
     pool_path = os.path.join(home, "data", "pool")
-    save_to_hdf5(pool_path)
+    save_to_hdf5_with_tables(pool_path)
     end_time = timeit.default_timer()
     
     print("Time consumed: {}".format(end_time - start_time))
