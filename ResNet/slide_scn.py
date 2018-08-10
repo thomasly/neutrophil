@@ -177,7 +177,8 @@ def slide_scn(scn_file=None, save_tiles=False):
     q = manager.Queue()
     
     # run the listener
-    watcher = pool.apply_async(listener, (q, ))
+    watcher = mp.Process(target=listener, args=(q, ))
+    
     
     # parameters passed to pool.map() function need to be packed in a list
     tasks = []
@@ -197,17 +198,15 @@ def slide_scn(scn_file=None, save_tiles=False):
     for task in tasks:
         job = pool.apply_async(v_slide, (task, ))
         jobs.append(job)
-    
-    start_watch = True
+        
+    watcher.start()
     for job in jobs:
         job.get()
-        if start_watch:
-            start_watch = False
-            watcher.get()
     
     # kill listener
     q.put('kill')
     print("killer sent.")
+    watcher.join()
     pool.close()
     print("Done!")
     print("Time consumed: {}".format(datetime.now() - start_time))
@@ -238,4 +237,5 @@ def slide_scn(scn_file=None, save_tiles=False):
     
             
 if __name__ == "__main__":
+    # mp.set_start_method('spawn')
     slide_scn(save_tiles=False)
