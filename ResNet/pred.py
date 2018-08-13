@@ -5,7 +5,7 @@ from math import ceil
 from load_model_from_file import load_model_from_json
 import numpy as np
 
-def read_hdf5(hdf5_file, dataset="train", batch_size=32, epochs=1):
+def read_hdf5(hdf5_file, dataset="train", batch_size=32):
     """
     """
     
