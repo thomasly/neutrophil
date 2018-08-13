@@ -39,12 +39,12 @@ def pool_img_based_on_pred(target_hdf5_file = None, target_pred_csv_file = None)
         
         for thresh in np.arange(0.1, 1.15, 0.1):
             try:
-                dir_path = os.path.join(save_path, str(thresh) + '_' + str(thresh + 0.1))
+                dir_path = os.path.join(save_path, "%.1f"%thresh + '_' + "%.1f"%(thresh + 0.1))
                 os.mkdir(dir_path)
             except OSError:
                 pass
             
-            ind = pred_df.loc[pred_df['preds'] > thresh]
+            ind = pred_df.loc[pred_df['preds'] >= thresh]
             ind = ind.index[ind['preds'] < (thresh + 0.1)].tolist()
             counter = 0
             for i in ind:
