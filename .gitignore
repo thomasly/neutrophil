@@ -226,3 +226,19 @@ venv.bak/
 # playground folder
 
 sandbox/
+
+# Saved deep learning models
+
+SavedModels/
+
+# Old Scripts
+
+OldScripts/
+
+# test.py
+
+test.py
+
+# emacs temp files
+
+*~
