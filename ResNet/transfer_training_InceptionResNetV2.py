@@ -14,7 +14,7 @@ def train(batch_size = 32, epochs = 15, validation = True):
     
     start_time = datetime.now()
     hdf5_path = os.path.join("..", "data", "76_79_80.hdf5")
-    model = InceptionResNetV2(classes = 1000)
+    model = InceptionResNetV2(weights=None, classes = 2)
     model.compile(
             optimizer = "adam", 
             loss = "binary_crossentropy", 
