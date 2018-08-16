@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from tensorflow.keras.applications.inception_resnet_v2 import InceptionResNetV2
-import datetime, os, tables
+import os, tables
 from math import ceil
 from LossHistory import LossHistory
 from read_hdf5 import read_hdf5
 from tensorflow.keras.utils import to_categorical
+from datetime import datetime
 
 def train(batch_size = 32, epochs = 15, validation = True):
     """
@@ -13,7 +14,7 @@ def train(batch_size = 32, epochs = 15, validation = True):
     
     start_time = datetime.now()
     hdf5_path = os.path.join("..", "data", "76_79_80.hdf5")
-    model = InceptionResNetV2(classes = 2)
+    model = InceptionResNetV2(classes = 1000)
     model.compile(
             optimizer = "adam", 
             loss = "binary_crossentropy", 
@@ -50,7 +51,7 @@ def train(batch_size = 32, epochs = 15, validation = True):
         if validation:
             eva_data = hdf5_file.root.val_img
             eva_labels = hdf5_file.root.val_labels
-            eva_labels = to_categorical(eva_labels, num_classes=2)
+            eva_labels = to_categorical(eva_labels, num_classes=1000)
             print("Validation data shape: {}".format(str(eva_data.shape)))
             print("validation labels shape: {}".format(str(eva_labels.shape)))
             preds = model.evaluate(eva_data, eva_labels)
@@ -68,3 +69,6 @@ def train(batch_size = 32, epochs = 15, validation = True):
         hdf5_file.close()
         
     print("Training time: ", datetime.now() - start_time)
+    
+if __name__ == '__main__':
+    train()

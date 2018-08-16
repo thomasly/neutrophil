@@ -22,7 +22,7 @@ def read_hdf5(hdf5_file, dataset="train", batch_size=32):
         targets = []
         for i in range(m_data):
             inputs.append(hdf5_file[data_img][ix[i]])
-            targets.append(to_categorical(hdf5_file[data_labels][ix[i]], num_classes=2))
+            targets.append(to_categorical(hdf5_file[data_labels][ix[i]], num_classes=1000))
             if (i+1) % batch_size == 0 or (i+1) == m_data:
                 inputs = np.stack(inputs)
                 targets = np.stack(targets)
