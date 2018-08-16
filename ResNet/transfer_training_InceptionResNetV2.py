@@ -1,25 +1,38 @@
 # -*- coding: utf-8 -*-
 
-from tensorflow.keras.applications.inception_resnet_v2 import InceptionResNetV2
+#from tensorflow.keras.applications.inception_resnet_v2 import InceptionResNetV2
+from tensorflow.keras.applications.inception_v3 import InceptionV3
 import os, tables
 from math import ceil
 from LossHistory import LossHistory
 from read_hdf5 import read_hdf5
-from tensorflow.keras.utils import to_categorical
 from datetime import datetime
+from tensorflow.keras.layers import Input, Dense, Flatten
+from tensorflow.keras.models import Model
 
-def train(batch_size = 32, epochs = 15, validation = True):
+def train(batch_size = 32, epochs = 10, validation = True):
     """
     """
     
     start_time = datetime.now()
     hdf5_path = os.path.join("..", "data", "76_79_80.hdf5")
-    model = InceptionResNetV2(weights=None, classes = 2)
-    model.compile(
+    model = InceptionV3(weights='imagenet', include_top=False)
+    
+    inputs = Input(shape=(299, 299, 3))
+    model_output = model(inputs)
+    
+    X = Flatten(name="flatten")(model_output)
+    X = Dense(128, activation='relu', name="dense")(X)
+    output = Dense(2, activation='softmax', name="classifier")(X)
+    
+    pretrained_model = Model(inputs=inputs, outputs=output)
+    pretrained_model.compile(
             optimizer = "adam", 
             loss = "binary_crossentropy", 
             metrics = ["accuracy"]
             )
+    
+    
     
     hdf5_file = tables.open_file(hdf5_path, mode = 'r')
     n_train = hdf5_file.root.train_img.shape[0]
@@ -31,7 +44,7 @@ def train(batch_size = 32, epochs = 15, validation = True):
     history = LossHistory('epoch_loss.log', 'batch_loss.log')
     
     try:
-        model.fit_generator(
+        pretrained_model.fit_generator(
                 read_hdf5(
                         hdf5_file, 
                         batch_size = batch_size,
@@ -49,12 +62,16 @@ def train(batch_size = 32, epochs = 15, validation = True):
                 )
         
         if validation:
-            eva_data = hdf5_file.root.val_img
-            eva_labels = hdf5_file.root.val_labels
-            eva_labels = to_categorical(eva_labels, num_classes=1000)
-            print("Validation data shape: {}".format(str(eva_data.shape)))
-            print("validation labels shape: {}".format(str(eva_labels.shape)))
-            preds = model.evaluate(eva_data, eva_labels)
+            n_val = hdf5_file.root.val_img.shape[0]
+            val_steps = int(ceil(n_val / batch_size))
+            preds = pretrained_model.evaluate_generator(
+                    read_hdf5(
+                            hdf5_file,
+                            dataset="val",
+                            batch_size=batch_size
+                            ),
+                    steps=val_steps
+                    )
             print("Validation loss: {}".format(preds[0]))
             print("Validation accuracy: {}".format(preds[1]))
         
