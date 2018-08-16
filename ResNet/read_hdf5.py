@@ -13,7 +13,7 @@ def read_hdf5(hdf5_file, dataset="train", batch_size=32):
     data_img = dataset + "_img"
     data_labels = dataset + "_labels"
     
-    m_data = hdf5_file.read(field=data_img).shape[0]
+    m_data = hdf5_file.root.__getitem__(data_img).shape[0]
     ix = list(range(m_data))
     
     while True:
@@ -21,8 +21,8 @@ def read_hdf5(hdf5_file, dataset="train", batch_size=32):
         inputs = []
         targets = []
         for i in range(m_data):
-            inputs.append(hdf5_file.read(field=data_img)[ix[i]])
-            targets.append(to_categorical(hdf5_file[data_labels][ix[i]], num_classes=1000))
+            inputs.append(hdf5_file.root.__getitem__(data_img)[ix[i]])
+            targets.append(to_categorical(hdf5_file.root.getitem(data_labels)[ix[i]], num_classes=1000))
             if (i+1) % batch_size == 0 or (i+1) == m_data:
                 inputs = np.stack(inputs)
                 targets = np.stack(targets)
