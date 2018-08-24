@@ -2,8 +2,9 @@
 
 from ResNet import ResNet50
 from read_hdf5 import read_hdf5
-import os, sys, h5py
-from keras.models import model_from_json
+import os, sys, tables
+from tensorflow.keras.models import model_from_json
+from tensorflow.keras.callbacks import TensorBoard
 from math import ceil
 from datetime import datetime
 from LossHistory import LossHistory
@@ -63,14 +64,15 @@ def train_resnet(
             metrics = ["accuracy"]
             )
     
-    hdf5_file = h5py.File(hdf5_path, mode = 'r')
-    n_train = hdf5_file["train_img"].shape[0]
-    n_test = hdf5_file["test_img"].shape[0]
+    hdf5_file = tables.open_file(hdf5_path, mode = 'r')
+    n_train = hdf5_file.root.train_img.shape[0]
+    n_test = hdf5_file.root.test_img.shape[0]
     
     steps_per_epoch = int(ceil(n_train / batch_size))
     validation_steps = int(ceil(n_test / batch_size))
 
     history = LossHistory('epoch_loss.log', 'batch_loss.log')
+    tensorboard = TensorBoard('./logs')
     
     try:
         model.fit_generator(
@@ -81,7 +83,7 @@ def train_resnet(
                 steps_per_epoch = steps_per_epoch,
                 epochs = epochs,
                 verbose = 2, 
-                callbacks = [history],
+                callbacks = [history, tensorboard],
                 validation_data = read_hdf5(
                         hdf5_file, 
                         dataset = "test", 
