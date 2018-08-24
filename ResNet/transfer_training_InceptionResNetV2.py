@@ -9,6 +9,7 @@ from read_hdf5 import read_hdf5
 from datetime import datetime
 from tensorflow.keras.layers import Input, Dense, Flatten
 from tensorflow.keras.models import Model
+from tensorflow.keras.callbacks import TensorBoard
 
 def train(batch_size = 32, epochs = 10, validation = True):
     """
@@ -42,7 +43,7 @@ def train(batch_size = 32, epochs = 10, validation = True):
     validation_steps = int(ceil(n_test / batch_size))
 
     history = LossHistory('epoch_loss.log', 'batch_loss.log')
-    
+    tensorboard = TensorBoard(log_dir="./logs")
     try:
         pretrained_model.fit_generator(
                 read_hdf5(
@@ -52,7 +53,7 @@ def train(batch_size = 32, epochs = 10, validation = True):
                 steps_per_epoch = steps_per_epoch,
                 epochs = epochs,
                 verbose = 2, 
-                callbacks = [history],
+                callbacks = [history, tensorboard],
                 validation_data = read_hdf5(
                         hdf5_file, 
                         dataset = "test", 
