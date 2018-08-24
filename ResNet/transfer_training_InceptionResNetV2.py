@@ -88,4 +88,15 @@ def train(batch_size = 32, epochs = 10, validation = True):
     print("Training time: ", datetime.now() - start_time)
     
 if __name__ == '__main__':
-    train()
+    batch_size = input("Batch size (default=32): ")
+    epochs = input("Epochos (default=10): ")
+    if len(batch_size) == 0:
+        batch_size = 32
+    else:
+        batch_size = int(batch_size)
+    
+    if len(epochs) == 0:
+        epochs = 32
+    else:
+        epochs = int(epochs)
+    train(batch_size, epochs, True)
