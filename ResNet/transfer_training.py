@@ -2,7 +2,7 @@
 
 #from tensorflow.keras.applications.inception_resnet_v2 import InceptionResNetV2
 from tensorflow.keras.applications.inception_v3 import InceptionV3
-import os, tables
+import os, tables, sys
 from math import ceil
 from LossHistory import LossHistory
 from read_hdf5 import read_hdf5
@@ -89,15 +89,17 @@ def train(batch_size = 32, epochs = 10, validation = True):
     print("Training time: ", datetime.now() - start_time)
     
 if __name__ == '__main__':
-    batch_size = input("Batch size (default=32): ")
-    epochs = input("Epochos (default=10): ")
-    if len(batch_size) == 0:
-        batch_size = 32
-    else:
-        batch_size = int(batch_size)
+    # batch_size = input("Batch size (default=32): ")
+    # epochs = input("Epochos (default=10): ")
+    # if len(batch_size) == 0:
+    #     batch_size = 32
+    # else:
+    #     batch_size = int(batch_size)
     
-    if len(epochs) == 0:
-        epochs = 32
-    else:
-        epochs = int(epochs)
-    train(batch_size, epochs, True)
+    # if len(epochs) == 0:
+    #     epochs = 32
+    # else:
+    #     epochs = int(epochs)
+    # train(batch_size, epochs, True)
+
+    train(sys.argv[1], sys.argv[2])
