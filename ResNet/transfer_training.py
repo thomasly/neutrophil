@@ -6,7 +6,7 @@ import os, tables, sys
 from math import ceil
 from LossHistory import LossHistory
 from read_hdf5 import read_hdf5
-from datetime import datetime
+from datetime import datetime, date
 from tensorflow.keras.layers import Input, Dense, Flatten
 from tensorflow.keras.models import Model
 from tensorflow.keras.callbacks import TensorBoard
@@ -42,8 +42,16 @@ def train(batch_size = 32, epochs = 10, validation = True):
     steps_per_epoch = int(ceil(n_train / batch_size))
     validation_steps = int(ceil(n_test / batch_size))
 
-    history = LossHistory('epoch_loss.log', 'batch_loss.log')
-    tensorboard = TensorBoard(log_dir="./logs")
+    timestamp = str(date.today()).replace('-', '_')
+    history = LossHistory('epoch_loss_{}.log'.format(timestamp), 
+                    'batch_loss_{}.log'.format(timestamp),
+                    'inceptionModel_{}.json'.format(timestamp),
+                    'inceptionWeights_{}.h5'.format(timestamp))
+    try:
+        os.mkdir('./logs_{}'.format(timestamp))
+    except IOError:
+        pass
+    tensorboard = TensorBoard(log_dir="./logs_{}".format(timestamp))
     try:
         pretrained_model.fit_generator(
                 read_hdf5(
@@ -102,4 +110,4 @@ if __name__ == '__main__':
     #     epochs = int(epochs)
     # train(batch_size, epochs, True)
 
-    train(sys.argv[1], sys.argv[2])
+    train(int(sys.argv[1]), int(sys.argv[2]))

@@ -22,10 +22,12 @@ class LossHistory(Callback):
             training). False: overwrite existing file,
     """
 
-    def __init__(self, epoch_filename, batch_filename, separator=',', append=False):
+    def __init__(self, epoch_filename, batch_filename, model_file, weights_file, separator=',', append=False):
         self.sep = separator
         self.epoch_filename = epoch_filename
         self.batch_filename = batch_filename
+        self.model_file = model_file
+        self.weights_file = weights_file
         self.append = append
         self.batch_writer = None
         self.epoch_writer = None
@@ -33,7 +35,7 @@ class LossHistory(Callback):
         self.epoch_keys = None
         self.append_header = True
         self.file_flags = 'b' if six.PY2 and os.name == 'nt' else ''
-        super(Callback, self).__init__()
+        super(LossHistory, self).__init__()
         
 
     def on_train_begin(self, logs=None):
@@ -90,11 +92,11 @@ class LossHistory(Callback):
         self.epoch_csv_file.flush()
         
         model_to_json = self.model.to_json()
-        with open("resModel.json", "w") as f:
+        with open(self.model_file, "w") as f:
             f.write(model_to_json)
-        print("Model saved to resModel.json!")
-        self.model.save_weights("modelWeights.h5")
-        print("Model weights saved to modelWeights.h5")
+        print("Model saved to {}!".format(self.model_file))
+        self.model.save_weights(self.weights_file)
+        print("Model weights saved to {}".format(self.weights_file))
         
 
     def on_batch_end(self, batch, logs=None):
