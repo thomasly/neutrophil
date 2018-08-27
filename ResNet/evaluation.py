@@ -32,7 +32,7 @@ def evaluate_model(json_file, weights, pred_file):
         preds = model.predict_generator(generator, steps=steps, verbose=1)
         true_values = hdf5_file.root.val_labels
 
-        fpr, tpr, _ = roc_curve(true_values.tolist(), preds.to_list())
+        fpr, tpr, _ = roc_curve(list(true_values), list(preds))
         roc_auc = auc(fpr, tpr)
 
         plt.figure()
