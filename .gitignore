@@ -1,3 +1,6 @@
+# hpc output files
+slurm*.out
+
 # .DS_Store file
 *.DS_Store
 
