@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 
-#from tensorflow.keras.applications.inception_resnet_v2 import InceptionResNetV2
-from tensorflow.keras.applications.inception_v3 import InceptionV3
+#from keras.applications.inception_resnet_v2 import InceptionResNetV2
+from keras.applications.inception_v3 import InceptionV3
 import os, tables, sys
 from math import ceil
 from LossHistory import LossHistory
 from read_hdf5 import read_hdf5
 from datetime import datetime, date
-from tensorflow.keras.layers import Input, Dense, Flatten
-from tensorflow.keras.models import Model
-from tensorflow.keras.callbacks import TensorBoard
-from tensorflow.keras.utils import multi_gpu_model
+from keras.layers import Input, Dense, Flatten
+from keras.models import Model
+from keras.callbacks import TensorBoard
+from keras.utils import multi_gpu_model
 import tensorflow as tf
 
-def train(batch_size = 32, epochs = 10, n_gpu = 4, validation = True):
+def train(batch_size = 32, epochs = 10, n_gpu = 8, validation = True):
     """
     """
     
@@ -28,8 +28,12 @@ def train(batch_size = 32, epochs = 10, n_gpu = 4, validation = True):
     X = Dense(128, activation='relu', name="dense")(X)
     output = Dense(2, activation='softmax', name="classifier")(X)
     
-    model = Model(inputs=inputs, outputs=output)
-    parallel_model = multi_gpu_model(model, gpus=8, cpu_merge=False)
+    with tf.device('/cpu:0'):
+        model = Model(inputs=inputs, outputs=output)
+        print("generated model on cpu.")
+    parallel_model = multi_gpu_model(model, gpus=n_gpu)
+    print("created parallel model")
+    sys.stdout.flush()
 
     parallel_model.compile(
             optimizer = "adam", 
@@ -46,15 +50,15 @@ def train(batch_size = 32, epochs = 10, n_gpu = 4, validation = True):
     validation_steps = int(ceil(n_test / batch_size))
 
     timestamp = str(date.today()).replace('-', '_')
-    # history = LossHistory('epoch_loss_{}.log'.format(timestamp), 
-    #                 'batch_loss_{}.log'.format(timestamp),
-    #                 'inceptionModel_{}.json'.format(timestamp),
-    #                 'inceptionWeights_{}.h5'.format(timestamp))
+    history = LossHistory('epoch_loss_{}.log'.format(timestamp), 
+                    'batch_loss_{}.log'.format(timestamp),
+                    'inceptionModel_{}.json'.format(timestamp),
+                    'inceptionWeights_{}.h5'.format(timestamp))
     try:
         os.mkdir('./logs_{}'.format(timestamp))
     except IOError:
         pass
-    # tensorboard = TensorBoard(log_dir="./logs_{}".format(timestamp))
+    tensorboard = TensorBoard(log_dir="./logs_{}".format(timestamp))
     try:
         parallel_model.fit_generator(
                 read_hdf5(
@@ -64,7 +68,7 @@ def train(batch_size = 32, epochs = 10, n_gpu = 4, validation = True):
                 steps_per_epoch = steps_per_epoch,
                 epochs = epochs,
                 verbose = 2, 
-                # callbacks = [history, tensorboard],
+                callbacks = [history, tensorboard],
                 validation_data = read_hdf5(
                         hdf5_file, 
                         dataset = "test", 
