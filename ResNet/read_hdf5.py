@@ -4,7 +4,7 @@
 from random import shuffle
 #import matplotlib.pyplot as plt
 import numpy as np
-from tensorflow.keras.utils import to_categorical
+from keras.utils import to_categorical
 
 def read_hdf5(hdf5_file, dataset="train", batch_size=32):
     """

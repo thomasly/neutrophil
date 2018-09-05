@@ -75,7 +75,7 @@ def listener(q):
         hdf5_file = tb.open_file(hdf5_path, mode='w')
         pred_storage = hdf5_file.create_earray(hdf5_file.root, 
                                                "pred_img", 
-                                               tb.UInt16Atom(), 
+                                               tb.UInt8Atom(), 
                                                shape=(0, 299, 299, 3))
         xlabel_storage = hdf5_file.create_earray(hdf5_file.root, 
                                                  "pos_xlabel", 

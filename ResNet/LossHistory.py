@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-from tensorflow.keras.callbacks import Callback
+from keras.callbacks import Callback
 import six, csv, os
 import numpy as np
 from collections import Iterable, OrderedDict

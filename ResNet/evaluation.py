@@ -1,5 +1,5 @@
 import os, sys, tables
-from tensorflow.keras.models import model_from_json
+from keras.models import model_from_json
 from math import ceil
 import matplotlib.pyplot as plt
 plt.switch_backend('agg')
