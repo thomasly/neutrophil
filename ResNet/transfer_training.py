@@ -67,7 +67,8 @@ def train(batch_size = 32, epochs = 10, validation = True):
                         dataset = "test", 
                         batch_size = batch_size,
                         ),
-                validation_steps = validation_steps
+                validation_steps = validation_steps,
+                workers=4
                 )
         
         if validation:
@@ -79,7 +80,8 @@ def train(batch_size = 32, epochs = 10, validation = True):
                             dataset="val",
                             batch_size=batch_size
                             ),
-                    steps=val_steps
+                    steps=val_steps,
+                    workers=4
                     )
             print("Validation loss: {}".format(preds[0]))
             print("Validation accuracy: {}".format(preds[1]))
