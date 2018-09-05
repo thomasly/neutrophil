@@ -115,4 +115,4 @@ if __name__ == '__main__':
     #     epochs = int(epochs)
     # train(batch_size, epochs, True)
 
-    train(int(sys.argv[1]), int(sys.argv[2]))
+    train(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]))
