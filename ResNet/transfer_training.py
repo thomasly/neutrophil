@@ -19,16 +19,13 @@ def train(batch_size = 32, epochs = 10, n_gpu = 8, validation = True):
     
     start_time = datetime.now()
     hdf5_path = os.path.join("..", "data", "76_79_80.hdf5")
-    model = InceptionV3(weights='imagenet', include_top=False)
-    
-    inputs = Input(shape=(299, 299, 3))
-    model_output = model(inputs)
-    
-    X = Flatten(name="flatten")(model_output)
-    X = Dense(128, activation='relu', name="dense")(X)
-    output = Dense(2, activation='softmax', name="classifier")(X)
-    
-    with tf.device('/cpu:0'):
+    with tf.device("/cpu:0"):
+        model = InceptionV3(weights='imagenet', include_top=False)
+        inputs = Input(shape=(299, 299, 3))
+        model_output = model(inputs)
+        X = Flatten(name="flatten")(model_output)
+        X = Dense(128, activation='relu', name="dense")(X)
+        output = Dense(2, activation='softmax', name="classifier")(X)
         model = Model(inputs=inputs, outputs=output)
         print("generated model on cpu.")
     parallel_model = multi_gpu_model(model, gpus=n_gpu)
@@ -40,7 +37,8 @@ def train(batch_size = 32, epochs = 10, n_gpu = 8, validation = True):
             loss = "binary_crossentropy", 
             metrics = ["accuracy"]
             )
-    
+    print("model compiled")
+    sys.stdout.flush()
     
     hdf5_file = tables.open_file(hdf5_path, mode = 'r')
     n_train = hdf5_file.root.train_img.shape[0]
@@ -59,6 +57,8 @@ def train(batch_size = 32, epochs = 10, n_gpu = 8, validation = True):
     except IOError:
         pass
     tensorboard = TensorBoard(log_dir="./logs_{}".format(timestamp))
+    print("start training:")
+    sys.stdout.flush()
     try:
         parallel_model.fit_generator(
                 read_hdf5(
