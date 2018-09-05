@@ -47,7 +47,7 @@ def train(batch_size = 32, epochs = 10, n_gpu = 8, validation = True):
     steps_per_epoch = int(ceil(n_train / batch_size))
     validation_steps = int(ceil(n_test / batch_size))
 
-    timestamp = str(date.today()).replace('-', '_')
+    timestamp = datetime.now().strftime(r"%Y%m%d%I%M")
     history = LossHistory('epoch_loss_{}.log'.format(timestamp), 
                     'batch_loss_{}.log'.format(timestamp),
                     'inceptionModel_{}.json'.format(timestamp),
