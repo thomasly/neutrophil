@@ -10,8 +10,10 @@ from datetime import datetime, date
 from tensorflow.keras.layers import Input, Dense, Flatten
 from tensorflow.keras.models import Model
 from tensorflow.keras.callbacks import TensorBoard
+from tensorflow.keras.utils import multi_gpu_model
+import tensorflow as tf
 
-def train(batch_size = 32, epochs = 10, validation = True):
+def train(batch_size = 32, epochs = 10, n_gpu = 4, validation = True):
     """
     """
     
@@ -26,13 +28,18 @@ def train(batch_size = 32, epochs = 10, validation = True):
     X = Dense(128, activation='relu', name="dense")(X)
     output = Dense(2, activation='softmax', name="classifier")(X)
     
-    pretrained_model = Model(inputs=inputs, outputs=output)
+    if n_gpu <=1:
+        pretrained_model = Model(inputs=inputs, outputs=output)
+    else:
+        with tf.device("/cpu:0"):
+            pretrained_model = Model(inputs=inputs, outputs=output)
+        pretrained_model = multi_gpu_model(pretrained_model, n_gpu)
+
     pretrained_model.compile(
             optimizer = "adam", 
             loss = "binary_crossentropy", 
             metrics = ["accuracy"]
             )
-    
     
     
     hdf5_file = tables.open_file(hdf5_path, mode = 'r')
@@ -67,8 +74,8 @@ def train(batch_size = 32, epochs = 10, validation = True):
                         dataset = "test", 
                         batch_size = batch_size,
                         ),
-                validation_steps = validation_steps,
-                workers=4
+                validation_steps = validation_steps
+                # workers=4
                 )
         
         if validation:
@@ -80,8 +87,8 @@ def train(batch_size = 32, epochs = 10, validation = True):
                             dataset="val",
                             batch_size=batch_size
                             ),
-                    steps=val_steps,
-                    workers=4
+                    steps=val_steps
+                    # workers=4
                     )
             print("Validation loss: {}".format(preds[0]))
             print("Validation accuracy: {}".format(preds[1]))
