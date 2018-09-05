@@ -28,16 +28,10 @@ def train(batch_size = 32, epochs = 10, n_gpu = 4, validation = True):
     X = Dense(128, activation='relu', name="dense")(X)
     output = Dense(2, activation='softmax', name="classifier")(X)
     
-    if n_gpu <= 1:
-        pretrained_model = Model(inputs=inputs, outputs=output)
-        print("training with 1 gpu or cpu")
-    else:
-        with tf.device("/cpu:0"):
-            pretrained_model = Model(inputs=inputs, outputs=output)
-        pretrained_model = multi_gpu_model(pretrained_model, n_gpu)
-        print("training with {} gpus".format(n_gpu))
+    model = Model(inputs=inputs, outputs=output)
+    parallel_model = multi_gpu_model(model, gpus=8, cpu_merge=False)
 
-    pretrained_model.compile(
+    parallel_model.compile(
             optimizer = "adam", 
             loss = "binary_crossentropy", 
             metrics = ["accuracy"]
@@ -62,7 +56,7 @@ def train(batch_size = 32, epochs = 10, n_gpu = 4, validation = True):
         pass
     # tensorboard = TensorBoard(log_dir="./logs_{}".format(timestamp))
     try:
-        pretrained_model.fit_generator(
+        parallel_model.fit_generator(
                 read_hdf5(
                         hdf5_file, 
                         batch_size = batch_size,
@@ -83,7 +77,7 @@ def train(batch_size = 32, epochs = 10, n_gpu = 4, validation = True):
         if validation:
             n_val = hdf5_file.root.val_img.shape[0]
             val_steps = int(ceil(n_val / batch_size))
-            preds = pretrained_model.evaluate_generator(
+            preds = parallel_model.evaluate_generator(
                     read_hdf5(
                             hdf5_file,
                             dataset="val",
