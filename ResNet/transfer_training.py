@@ -28,12 +28,14 @@ def train(batch_size = 32, epochs = 10, n_gpu = 4, validation = True):
     X = Dense(128, activation='relu', name="dense")(X)
     output = Dense(2, activation='softmax', name="classifier")(X)
     
-    if n_gpu <=1:
+    if n_gpu <= 1:
         pretrained_model = Model(inputs=inputs, outputs=output)
+        print("training with 1 gpu or cpu")
     else:
         with tf.device("/cpu:0"):
             pretrained_model = Model(inputs=inputs, outputs=output)
         pretrained_model = multi_gpu_model(pretrained_model, n_gpu)
+        print("training with {} gpus".format(n_gpu))
 
     pretrained_model.compile(
             optimizer = "adam", 
@@ -50,15 +52,15 @@ def train(batch_size = 32, epochs = 10, n_gpu = 4, validation = True):
     validation_steps = int(ceil(n_test / batch_size))
 
     timestamp = str(date.today()).replace('-', '_')
-    history = LossHistory('epoch_loss_{}.log'.format(timestamp), 
-                    'batch_loss_{}.log'.format(timestamp),
-                    'inceptionModel_{}.json'.format(timestamp),
-                    'inceptionWeights_{}.h5'.format(timestamp))
+    # history = LossHistory('epoch_loss_{}.log'.format(timestamp), 
+    #                 'batch_loss_{}.log'.format(timestamp),
+    #                 'inceptionModel_{}.json'.format(timestamp),
+    #                 'inceptionWeights_{}.h5'.format(timestamp))
     try:
         os.mkdir('./logs_{}'.format(timestamp))
     except IOError:
         pass
-    tensorboard = TensorBoard(log_dir="./logs_{}".format(timestamp))
+    # tensorboard = TensorBoard(log_dir="./logs_{}".format(timestamp))
     try:
         pretrained_model.fit_generator(
                 read_hdf5(
@@ -68,7 +70,7 @@ def train(batch_size = 32, epochs = 10, n_gpu = 4, validation = True):
                 steps_per_epoch = steps_per_epoch,
                 epochs = epochs,
                 verbose = 2, 
-                callbacks = [history, tensorboard],
+                # callbacks = [history, tensorboard],
                 validation_data = read_hdf5(
                         hdf5_file, 
                         dataset = "test", 
