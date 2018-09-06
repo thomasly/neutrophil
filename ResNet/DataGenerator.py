@@ -20,16 +20,16 @@ class DataGenerator(keras.utils.Sequence):
         self.batch_size = batch_size
         self.n_classes = n_classes
         self.shuffle = shuffle
-        self.on_epoch_end()
         self.hdf5_file_name = hdf5_file_name
         self.data_img = dataset + "_img"
         self.data_labels = dataset + "_labels"
         with tb.open_file(self.hdf5_file_name, "r") as hdf5_file:
             data_shape = hdf5_file.root.__getitem__(self.data_img).shape
-        self.n_data = len(data_shape[0])
+        self.n_data = data_shape[0]
         self.dim = data_shape[1:3]
         self.n_channels = data_shape[3]
         self.list_IDs = np.arange(self.n_data)
+        self.on_epoch_end()
         
     
     def on_epoch_end(self):
