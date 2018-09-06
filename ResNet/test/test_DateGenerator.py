@@ -1,8 +1,11 @@
-import importlib.util, os
-spec = importlib.util.spec_from_file_location("DataGenerator", "../DataGenerator.py")
-DataGenerator = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(DataGenerator)
-
+# import importlib.util, os
+# spec = importlib.util.spec_from_file_location("DataGenerator", "../DataGenerator.py")
+# DataGenerator = importlib.util.module_from_spec(spec)
+# spec.loader.exec_module(DataGenerator)
+import sys
+sys.path.append("..")
+from DataGenerator import DataGenerator
+import os
 
 def test_data_generator():
 
@@ -12,7 +15,7 @@ def test_data_generator():
         "shuffle" : True,
         "n_classes" : 2
     }
-    generator = DataGenerator.DataGenerator(hdf5_file, "train", **params)
+    generator = DataGenerator(hdf5_file, "train", **params)
     print("Batch size: ", generator.batch_size)
     print("Data dim: ", generator.dim)
     print("Classes: ", generator.n_classes)
