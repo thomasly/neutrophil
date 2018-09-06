@@ -5,13 +5,14 @@ from keras.applications.inception_v3 import InceptionV3
 import os, tables, sys
 from math import ceil
 from LossHistory import LossHistory
-from read_hdf5 import read_hdf5
+from DataGenerator import DataGenerator
 from datetime import datetime, date
 from keras.layers import Input, Dense, Flatten
 from keras.models import Model
-from keras.callbacks import TensorBoard
+from keras.callbacks import TensorBoard, LearningRateScheduler
 from keras.utils import multi_gpu_model
 import tensorflow as tf
+
 
 def train(batch_size = 32, epochs = 10, n_gpu = 8, validation = True):
     """
@@ -27,9 +28,9 @@ def train(batch_size = 32, epochs = 10, n_gpu = 8, validation = True):
         X = Dense(128, activation='relu', name="dense")(X)
         output = Dense(2, activation='softmax', name="classifier")(X)
         model = Model(inputs=inputs, outputs=output)
-        print("generated model on cpu.")
+        print("Generated model on cpu...")
     parallel_model = multi_gpu_model(model, gpus=n_gpu)
-    print("created parallel model")
+    print("Created parallel model...")
     sys.stdout.flush()
 
     parallel_model.compile(
@@ -37,15 +38,8 @@ def train(batch_size = 32, epochs = 10, n_gpu = 8, validation = True):
             loss = "binary_crossentropy", 
             metrics = ["accuracy"]
             )
-    print("model compiled")
+    print("Model compiled...")
     sys.stdout.flush()
-    
-    hdf5_file = tables.open_file(hdf5_path, mode = 'r')
-    n_train = hdf5_file.root.train_img.shape[0]
-    n_test = hdf5_file.root.test_img.shape[0]
-    
-    steps_per_epoch = int(ceil(n_train / batch_size))
-    validation_steps = int(ceil(n_test / batch_size))
 
     timestamp = datetime.now().strftime(r"%Y%m%d%I%M")
     history = LossHistory('epoch_loss_{}.log'.format(timestamp), 
@@ -57,51 +51,35 @@ def train(batch_size = 32, epochs = 10, n_gpu = 8, validation = True):
     except IOError:
         pass
     tensorboard = TensorBoard(log_dir="./logs_{}".format(timestamp))
-    print("start training:")
+    print("Start training...")
     sys.stdout.flush()
-    try:
-        parallel_model.fit_generator(
-                read_hdf5(
-                        hdf5_file, 
-                        batch_size = batch_size,
-                        ), 
-                steps_per_epoch = steps_per_epoch,
-                epochs = epochs,
-                verbose = 2, 
-                callbacks = [history, tensorboard],
-                validation_data = read_hdf5(
-                        hdf5_file, 
-                        dataset = "test", 
-                        batch_size = batch_size,
-                        ),
-                validation_steps = validation_steps
-                # workers=4
-                )
-        
-        if validation:
-            n_val = hdf5_file.root.val_img.shape[0]
-            val_steps = int(ceil(n_val / batch_size))
-            preds = parallel_model.evaluate_generator(
-                    read_hdf5(
-                            hdf5_file,
-                            dataset="val",
-                            batch_size=batch_size
-                            ),
-                    steps=val_steps
-                    # workers=4
-                    )
-            print("Validation loss: {}".format(preds[0]))
-            print("Validation accuracy: {}".format(preds[1]))
-        
-        hdf5_file.close()
 
-    except StopIteration:
-        
-        hdf5_file.close()
-        
-    finally:
-        
-        hdf5_file.close()
+    data_params = {
+        "batch_size" : batch_size,
+        "n_classes" : 2,
+        "shuffle" : True
+    }
+    train_generator = DataGenerator(hdf5_path, "train", **data_params)
+    valid_generator = DataGenerator(hdf5_path, "test", **data_params)
+    parallel_model.fit_generator(
+            train_generator,
+            epochs = epochs,
+            verbose = 2, 
+            callbacks = [history, tensorboard],
+            validation_data = valid_generator,
+            use_multiprocessing = True,
+            workers = 8
+            )
+    
+    if validation:
+        pred_generator = DataGenerator(hdf5_path, "val", **data_params)
+        preds = parallel_model.evaluate_generator(
+                pred_generator,
+                use_multiprocessing = True,
+                workers = 8
+                )
+        print("Validation loss: {}".format(preds[0]))
+        print("Validation accuracy: {}".format(preds[1]))
         
     print("Training time: ", datetime.now() - start_time)
     
