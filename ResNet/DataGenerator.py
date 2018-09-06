@@ -41,12 +41,12 @@ class DataGenerator(keras.utils.Sequence):
             np.random.shuffle(self.indices)
 
     
-    def __data_generation(self, list_IDs_temp):
+    def __data_generation(self, list_IDs_temp, real_batch_size):
         """
         Generates data containing batch_size samples
         """
-        X = np.empty((self.batch_size, *self.dim, self.n_channels))
-        Y = np.empty((self.batch_size), dtype=int)
+        X = np.empty((real_batch_size, *self.dim, self.n_channels))
+        Y = np.empty((real_batch_size), dtype=int)
 
         # generate data
         with tb.open_file(self.hdf5_file_name, 'r') as hdf5_file:
@@ -71,16 +71,16 @@ class DataGenerator(keras.utils.Sequence):
         """
         Generate one batch of data
         """
-        batch_indices = self.indices[
-            index * self.batch_size : min(
-                (index + 1) * self.batch_size, self.n_data)
-        ]
+        start = index * self.batch_size
+        end = min((index + 1) * self.batch_size, self.n_data)
+        batch_indices = self.indices[start : end]
+        real_batch_size = end - start
 
         # find list of IDs
         list_IDs_temp = [self.list_IDs[k] for k in batch_indices]
 
         # generate data
-        X, Y = self.__data_generation(list_IDs_temp)
+        X, Y = self.__data_generation(list_IDs_temp, real_batch_size)
 
         return X, Y
 
