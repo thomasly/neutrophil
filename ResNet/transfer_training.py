@@ -69,7 +69,8 @@ def train(batch_size = 32, epochs = 10, n_gpu = 8, validation = True):
             callbacks = [history, tensorboard],
             validation_data = valid_generator,
             use_multiprocessing = True,
-            workers = 8
+            workers = 8,
+            max_queue_size = 5
             )
     
     if validation:
