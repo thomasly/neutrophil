@@ -1,5 +1,6 @@
 import keras
 import numpy as np
+import tables as tb
 
 class DataGenerator(keras.utils.Sequence):
 
@@ -23,7 +24,7 @@ class DataGenerator(keras.utils.Sequence):
         self.hdf5_file_name = hdf5_file_name
         self.data_img = dataset + "_img"
         self.data_labels = dataset + "_labels"
-        with open(self.hdf5_file_name, "r") as hdf5_file:
+        with tb.open_file(self.hdf5_file_name, "r") as hdf5_file:
             data_shape = hdf5_file.root.__getitem__(self.data_img).shape
             self.n_data = len(data_shape[0])
             self.dim = data_shape[1:3]
@@ -48,7 +49,7 @@ class DataGenerator(keras.utils.Sequence):
         Y = np.empty((self.batch_size), dtype=int)
 
         # generate data
-        with open(self.hdf5_file_name, 'r') as hdf5_file:
+        with tb.open_file(self.hdf5_file_name, 'r') as hdf5_file:
             for i, ID in enumerate(list_IDs_temp):
                 # store samples
                 X[i,] = hdf5_file.root.__getitem__(self.data_img)[ID]
