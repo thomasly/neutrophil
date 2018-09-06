@@ -12,6 +12,7 @@ from keras.models import Model
 from keras.callbacks import TensorBoard, LearningRateScheduler
 from keras.utils import multi_gpu_model
 import tensorflow as tf
+import argparse
 
 
 def train(batch_size = 32, epochs = 10, n_gpu = 8, validation = True):
@@ -83,18 +84,35 @@ def train(batch_size = 32, epochs = 10, n_gpu = 8, validation = True):
         
     print("Training time: ", datetime.now() - start_time)
     
-if __name__ == '__main__':
-    # batch_size = input("Batch size (default=32): ")
-    # epochs = input("Epochos (default=10): ")
-    # if len(batch_size) == 0:
-    #     batch_size = 32
-    # else:
-    #     batch_size = int(batch_size)
-    
-    # if len(epochs) == 0:
-    #     epochs = 32
-    # else:
-    #     epochs = int(epochs)
-    # train(batch_size, epochs, True)
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Train neural network.")
+    parser.add_argument(
+        "-b",
+        "--batch-size", 
+        type=int,
+        default=32,
+        help="Size of mini batches."
+    )
+    parser.add_argument(
+        "-e", 
+        "--epochs", 
+        type=int, 
+        default=20, 
+        help="Number of epochs."
+    )
+    parser.add_argument(
+        "-g", 
+        "--n-gpu", 
+        type=int, 
+        default=8, 
+        help="Number of gpu."
+    )
+    parser.add_argument(
+        "-v",
+        "--validation",
+        action="store_true"
+    )
+    args = vars(parser.parse_args())
 
-    train(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]))
+    print(args)
+    train(**args)
