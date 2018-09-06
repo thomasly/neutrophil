@@ -1,6 +1,7 @@
 import keras
 import numpy as np
 import tables as tb
+import gc
 
 class DataGenerator(keras.utils.Sequence):
 
@@ -30,6 +31,7 @@ class DataGenerator(keras.utils.Sequence):
         self.n_channels = data_shape[3]
         self.list_IDs = np.arange(self.n_data)
         self.on_epoch_end()
+        gc.enable()
         
     
     def on_epoch_end(self):
@@ -39,6 +41,7 @@ class DataGenerator(keras.utils.Sequence):
         self.indices = np.arange(len(self.list_IDs))
         if self.shuffle:
             np.random.shuffle(self.indices)
+        gc.collect()
 
     
     def __data_generation(self, list_IDs_temp, real_batch_size):
@@ -81,7 +84,8 @@ class DataGenerator(keras.utils.Sequence):
 
         # generate data
         X, Y = self.__data_generation(list_IDs_temp, real_batch_size)
-
+        
+        gc.collect()
         return X, Y
 
 
