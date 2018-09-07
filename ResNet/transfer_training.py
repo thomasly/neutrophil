@@ -36,7 +36,7 @@ def train(batch_size = 32, epochs = 10, n_gpu = 8, validation = True):
 
     parallel_model.compile(
             optimizer = "adam", 
-            loss = "binary_crossentropy", 
+            loss = "categorical_crossentropy", 
             metrics = ["accuracy"]
             )
     print("Model compiled...")
