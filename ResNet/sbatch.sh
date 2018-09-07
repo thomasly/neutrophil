@@ -2,7 +2,7 @@
 
 #SBATCH --job-name=tensorflow                                                                                                                                                                                                                                                                         
 #SBATCH --nodes=1                                                                                                                                                                                                                                                                                     
-##SBATCH --cpus-per-task=1                                                                                                                                                                                                                                                                            
+#SBATCH --cpus-per-task=2                                                                                                                                                                                                                                                                           
 #SBATCH --mem=30GB                                                                                                                                                                                                                                                                                   
 #SBATCH --gres=gpu:8                                                                                                                                                                                                                                                                                  
 #SBATCH --partition=gpu8_medium                                                                                                                                                                                                                                                                       
@@ -28,4 +28,4 @@ module add cuda91/toolkit/9.1.85
 #module add cuda80/profiler/8.0.61                                                                                                                                                                                                                                                                    
 #module add cuda80/toolkit/8.0.61                                                                                                                                                                                                                                                                     
 wait
-python $1 $2 $3 $4
+python $1 -b $2 -e $3 -g $4 -v
