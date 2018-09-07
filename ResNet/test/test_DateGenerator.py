@@ -29,6 +29,7 @@ def test_data_generator():
     print("Data 32 shape: ", dataset[31].shape)
     print("Label 1: ", labels[0])
     print("Label 32: ", labels[31])
+    print("Data:", dataset)
     try:
         dataset[32]
     except IndexError:
