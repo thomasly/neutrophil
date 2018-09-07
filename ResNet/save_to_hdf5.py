@@ -49,13 +49,13 @@ def save_to_hdf5(path):
     m_test = len(x_test)
     m_val = len(x_val)
     
-    hdf5_file.create_dataset("train_img", train_shape, np.int16)
-    hdf5_file.create_dataset("test_img", test_shape, np.int16)
-    hdf5_file.create_dataset("val_img", val_shape, np.int16)
+    hdf5_file.create_dataset("train_img", train_shape, np.uint8)
+    hdf5_file.create_dataset("test_img", test_shape, np.uint8)
+    hdf5_file.create_dataset("val_img", val_shape, np.uint8)
     
-    hdf5_file.create_dataset("train_labels", (m_train,), np.int16)
-    hdf5_file.create_dataset("test_labels", (m_test,), np.int16)
-    hdf5_file.create_dataset("val_labels", (m_val,), np.int16)
+    hdf5_file.create_dataset("train_labels", (m_train,), np.uint8)
+    hdf5_file.create_dataset("test_labels", (m_test,), np.uint8)
+    hdf5_file.create_dataset("val_labels", (m_val,), np.uint8)
     
     hdf5_file.create_dataset("train_mean", train_shape[1:], np.float32)
     
@@ -136,15 +136,15 @@ def save_to_hdf5_with_tables(path):
     m_test = len(x_test)
     m_val = len(x_val)
     
-    train_storage = hdf5_file.create_earray(hdf5_file.root, "train_img", tb.UInt16Atom(), shape=data_shape)
-    test_storage = hdf5_file.create_earray(hdf5_file.root, "test_img", tb.UInt16Atom(), shape=data_shape)
-    val_storage = hdf5_file.create_earray(hdf5_file.root, "val_img", tb.UInt16Atom(), shape=data_shape)
+    train_storage = hdf5_file.create_earray(hdf5_file.root, "train_img", tb.UInt8Atom(), shape=data_shape)
+    test_storage = hdf5_file.create_earray(hdf5_file.root, "test_img", tb.UInt8Atom(), shape=data_shape)
+    val_storage = hdf5_file.create_earray(hdf5_file.root, "val_img", tb.UInt8Atom(), shape=data_shape)
     
     hdf5_file.create_array(hdf5_file.root, "train_labels", y_train)
     hdf5_file.create_array(hdf5_file.root, "test_labels", y_test)
     hdf5_file.create_array(hdf5_file.root, "val_labels", y_val)
     
-    mean_storage = hdf5_file.create_earray(hdf5_file.root, "train_mean", tb.UInt16Atom(), shape=data_shape)
+    mean_storage = hdf5_file.create_earray(hdf5_file.root, "train_mean", tb.Float32Atom(), shape=data_shape)
     
     mean = np.zeros(data_shape[1:], np.float32)
   
