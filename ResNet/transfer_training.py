@@ -118,18 +118,28 @@ def train(
     sys.stdout.flush()
 
     timestamp = datetime.now().strftime(r"%Y%m%d_%I%M%p")
+    tb_log_path = os.path.join(paths.logs, 'logs_{}'.format(timestamp))
+    os.makedirs(tb_log_path, exist_ok=True)
+    os.makedirs(paths.models, exist_ok=True)
+    
+    epoch_loss_path = os.path.join(
+        paths.logs, 
+        "{}_epoch_loss_{}.log".format(model_name, timestamp)
+    )
+    batch_loss_path = os.path.join(
+        paths.logs, 
+        "{}_batch_loss_{}.log".format(model_name, timestamp)
+    )
+    model_hdf5_path = os.path.join(
+        paths.models,
+        "{}_{}.hdf5".format(model_name, timestamp)
+    )
     history = LossHistory(
-        '{}_epoch_loss_{}.log'.format(model_name, timestamp), 
-        '{}_batch_loss_{}.log'.format(model_name, timestamp),
-        '{}_{}.json'.format(model_name, timestamp),
-        '{}_{}.h5'.format(model_name, timestamp)
+        epoch_loss_path,
+        batch_loss_path,
+        model_hdf5_path
     )             
     
-    tb_log_path = os.path.join(paths.logs, 'logs_{}'.format(timestamp))
-    try:
-        os.makedirs(tb_log_path)
-    except OSError:
-        pass
     tensorboard = TensorBoard(log_dir = tb_log_path)
     print("Start training...")
     sys.stdout.flush()
