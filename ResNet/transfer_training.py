@@ -55,12 +55,10 @@ def generate_model(
             pooling=pooling
         )
         # add top
-        top_model = Sequential()
-        top_model.add(Flatten(input_shape=model.output_shape[1:]))
-        top_model.add(Dense(256, activation="relu"))
-        top_model.add(Dropout(0.5))
-        top_model.add(Dense(classes, activation="softmax"))
-        model.add(top_model)
+        model_output = model.output
+        X = Dense(256, activation = "relu")(model_output)
+        outputs = Dense(classes, activationg = "softmax")(X)
+        model = Model(model.input, outputs)
         
     return model
 
@@ -88,7 +86,7 @@ def train(
                 include_top=False, 
                 weights=None, 
                 classes=classes, 
-                pooling=None
+                pooling="avg"
             )
             print("Generated model on cpu...")
             sys.stdout.flush()
@@ -106,7 +104,7 @@ def train(
             include_top=False, 
             weights=None, 
             classes=2, 
-            pooling=None
+            pooling="avg"
         )
         print("Generated model on cpu...")
         sys.stdout.flush()
