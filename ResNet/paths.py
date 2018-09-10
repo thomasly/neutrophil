@@ -20,8 +20,9 @@ class Paths:
         self.data_orig_80 = os.path.join(self.data_orig, "80")
         self.neg_80 = os.path.join(self.data_orig_80, "neg")
         self.pos_80 = os.path.join(self.data_orig_80, "pos")
-        self.slide_80 = os.path.join(self.data_orig, "ImageCollection_80.scn")
+        self.slice_80 = os.path.join(self.data_orig, "ImageCollection_80.scn")
         self.hdf5_76_79_80 = os.path.join(self.data, "76_79_80.hdf5")
+        self.tiles_80 = os.path.join(self.data_test, "tiles_80.hdf5")
 
         # log directory
         self.logs = os.path.join(self.source, "logs")
