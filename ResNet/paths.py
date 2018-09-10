@@ -26,6 +26,7 @@ class Paths:
 
         # log directory
         self.logs = os.path.join(self.source, "logs")
+        self.pred_cvs = os.path.join(self.data_test, "predictions.csv")
 
         # model directory
         self.models = os.path.join(self.source, "models")
