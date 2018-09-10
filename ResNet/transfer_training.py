@@ -16,6 +16,7 @@ import tensorflow as tf
 import argparse
 from paths import Paths
 
+
 def generate_model(
     model_name, 
     input_shape, 
@@ -166,7 +167,8 @@ def train(
     minutes = time_consumed % 3600 // 60
     seconds = time_consumed % 60 
     print("Training time: {}h{}m{}s".format(hours, minutes, seconds))
-    
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train neural network.")
     parser.add_argument(
