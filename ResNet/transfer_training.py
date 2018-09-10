@@ -57,7 +57,7 @@ def generate_model(
         # add top
         model_output = model.output
         X = Dense(256, activation = "relu")(model_output)
-        outputs = Dense(classes, activationg = "softmax")(X)
+        outputs = Dense(classes, activation = "softmax")(X)
         model = Model(model.input, outputs)
         
     return model
