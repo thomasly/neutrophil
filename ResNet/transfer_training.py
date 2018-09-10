@@ -8,8 +8,8 @@ from math import ceil
 from LossHistory import LossHistory
 from DataGenerator import DataGenerator
 from datetime import datetime, date
-from keras.layers import Input, Dense, Flatten
-from keras.models import Model
+from keras.layers import Input, Dense, Flatten, Dropout
+from keras.models import Model, Sequential
 from keras.callbacks import TensorBoard, LearningRateScheduler
 from keras.utils import multi_gpu_model
 import tensorflow as tf
@@ -54,12 +54,14 @@ def generate_model(
             input_shape=input_shape,
             pooling=pooling
         )
-        inputs = Input(shape=input_shape)
-        model_output = model(inputs)
-        X = Flatten(name="flatten")(model_output)
-        X = Dense(128, activation="relu", name="dense_last")(X)
-        outputs = Dense(classes, activation="softmax", name="classifier")(X)
-        model = Model(inputs, outputs)
+        # add top
+        top_model = Sequential()
+        top_model.add(Flatten(input_shape=model.output_shape[1:]))
+        top_model.add(Dense(256, activation="relu"))
+        top_model.add(Dropout(0.5))
+        top_model.add(Dense(classes, activation="softmax"))
+        model.add(top_model)
+        
     return model
 
 
@@ -121,7 +123,7 @@ def train(
     tb_log_path = os.path.join(paths.logs, 'logs_{}'.format(timestamp))
     os.makedirs(tb_log_path, exist_ok=True)
     os.makedirs(paths.models, exist_ok=True)
-    
+
     epoch_loss_path = os.path.join(
         paths.logs, 
         "{}_epoch_loss_{}.log".format(model_name, timestamp)
