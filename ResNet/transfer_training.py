@@ -88,7 +88,7 @@ def train(
                 include_top=False, 
                 weights=None, 
                 classes=classes, 
-                pooling='max'
+                pooling=None
             )
             print("Generated model on cpu...")
             sys.stdout.flush()
