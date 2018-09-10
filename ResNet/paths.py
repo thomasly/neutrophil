@@ -24,4 +24,7 @@ class Paths:
         self.hdf5_76_79_80 = os.path.join(self.data, "76_79_80.hdf5")
 
         # log directory
-        self.logs = os.path.join(self.home, "logs")
+        self.logs = os.path.join(self.source, "logs")
+
+        # model directory
+        self.models = os.path.join(self.source, "models")
