@@ -32,13 +32,13 @@ def v_slide(params):
         save_tiles = params["save_tiles"]
         q = params["queue"]
         
-        AVG_THRESHOLD = 180
+        AVG_THRESHOLD = 170
         pid = os.getpid()
         data = {}
         while y0 < bound_y:
             img = scn_file.read_region((x0, y0), 0, (299, 299))
             green_c_avg = np.average(np.array(img)[:, :, 1])
-            if green_c_avg > AVG_THRESHOLD:
+            if green_c_avg < AVG_THRESHOLD:
                 sufix = "_" + str(x0) + "_" + \
                         str(y0) + ".png"
                 file_name = "scn80" + sufix
@@ -195,11 +195,11 @@ def slide_scn(scn_file=None, save_tiles=False):
         job.get()
     
     # kill listener
-    q.put('kill')
+    q.put("kill")
     print("killer sent.")
     watcher.join()
     pool.close()
-    print("Done!")
+    print("\nDone!")
     print("Time consumed: {}".format(datetime.now() - start_time))
     
 #    h5_file_path = os.path.join(tile_path, "pred_img.hdf5")
