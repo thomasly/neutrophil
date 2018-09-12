@@ -151,15 +151,27 @@ def train(
     }
     train_generator = DataGenerator(hdf5_path, "train", **data_params)
     valid_generator = DataGenerator(hdf5_path, "test", **data_params)
-    model.fit_generator(
+    if n_gpu == 1:
+        model.fit_generator(
             train_generator,
             epochs = epochs,
             verbose = 2, 
             callbacks = [history, tensorboard],
             validation_data = valid_generator
-            # use_multiprocessing = False
-            # workers = 1
+            # use_multiprocessing = True,
+            # workers = 3
             # max_queue_size = 5
+            )
+    if n_gpu > 1:
+        model.fit_generator(
+            train_generator,
+            epochs = epochs,
+            verbose = 2,
+            callbacks = [history, tensorboard],
+            validation_data = valid_generator,
+            use_multiprocessing = True,
+            workers = 3
+            # max_queue_size = 5                                                                                                                               
             )
     
     if validation:
