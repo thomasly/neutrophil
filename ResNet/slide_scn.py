@@ -38,13 +38,13 @@ def v_slide(params):
         save_tiles = params["save_tiles"]
         q = params["queue"]
         
-        STD_THRESHOLD = 40
+        AVG_THRESHOLD = 180
         pid = os.getpid()
         data = {}
         while y0 < bound_y:
             img = scn_file.read_region((x0, y0), 0, (299, 299))
-            std = np.std(img)
-            if std > STD_THRESHOLD:
+            green_c_avg = np.average(np.array(img)[:, :, 1])
+            if green_c_avg > AVG_THRESHOLD:
                 sufix = "_" + str(x0) + "_" + \
                         str(y0) + ".png"
                 file_name = "scn80" + sufix
