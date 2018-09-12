@@ -185,9 +185,9 @@ def train(
         print("Validation accuracy: {}".format(preds[1]))
     
     time_consumed = datetime.now() - start_time
-    hours = time_consumed // 3600
-    minutes = time_consumed % 3600 // 60
-    seconds = time_consumed % 60 
+    hours = time_consumed.seconds // 3600
+    minutes = time_consumed.seconds % 3600 // 60
+    seconds = time_consumed.seconds % 60 
     print("Training time: {}h{}m{}s".format(hours, minutes, seconds))
 
 
