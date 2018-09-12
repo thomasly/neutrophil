@@ -171,8 +171,8 @@ def train(
             validation_data = valid_generator,
             use_multiprocessing = True,
             workers = 3
-            # max_queue_size = 5                                                                                                                               
-            )
+            # max_queue_size = 5
+        )
     
     if validation:
         pred_generator = DataGenerator(hdf5_path, "val", **data_params)
