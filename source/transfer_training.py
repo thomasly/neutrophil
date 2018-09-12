@@ -37,16 +37,16 @@ def generate_model(
         if weights:
             model = models[model_name](
                 weights=weights, 
-                include_top=include_top
+                include_top=include_top,
             )
         else:
             model = models[model_name](
                 weights=weights, 
                 include_top=include_top,
-                classes=classes
+                classes=classes,
             )
     
-    elif not include_top:
+    else:
         model = models[model_name](
             weights=weights, 
             include_top=include_top, 
@@ -118,7 +118,7 @@ def train(
     sys.stdout.flush()
 
     timestamp = datetime.now().strftime(r"%Y%m%d_%I%M%p")
-    tb_log_path = os.path.join(paths.logs, 'logs_{}'.format(timestamp))
+    tb_log_path = os.path.join(paths.logs, '{}_logs_{}'.format(model_name, timestamp))
     os.makedirs(tb_log_path, exist_ok=True)
     os.makedirs(paths.models, exist_ok=True)
 
