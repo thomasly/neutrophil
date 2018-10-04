@@ -5,7 +5,7 @@ Project: Neutrophil Identifier
 Author: Yang Liu
 Created date: Sep 5, 2018 4:13 PM
 -----
-Last Modified: Oct 4, 2018 11:05 AM
+Last Modified: Oct 4, 2018 12:34 PM
 Modified By: Yang Liu
 -----
 License: MIT
@@ -18,6 +18,7 @@ import os
 import sys
 import logging
 import tables
+from paths import Paths
 from keras.models import model_from_json
 from keras.callbacks import TensorBoard
 from math import ceil
@@ -66,6 +67,8 @@ def train_resnet(
     """
     """
     start_time = datetime.now()
+    paths = Paths()
+    model_name = "ResNet50"
     hdf5_path = os.path.join("..", "data", "76_79_80_noValidate.hdf5")
     if new_model:
         model = ResNet50()
@@ -75,7 +78,7 @@ def train_resnet(
 
     model.compile(
             optimizer="adam",
-            loss="binary_crossentropy",
+            loss="categorical_crossentropy",
             metrics=["accuracy"]
             )
 
@@ -86,10 +89,30 @@ def train_resnet(
     steps_per_epoch = int(ceil(n_train / batch_size))
     validation_steps = int(ceil(n_test / batch_size))
 
-    history = LossHistory(
-        'epoch_loss.log', 'batch_loss.log', 'resNet50_model.h5'
+    timestamp = datetime.now().strftime(r"%Y%m%d_%I%M%p")
+    tb_log_path = os.path.join(
+        paths.logs, '{}_logs_{}'.format(model_name, timestamp))
+    os.makedirs(tb_log_path, exist_ok=True)
+    os.makedirs(paths.models, exist_ok=True)
+
+    epoch_loss_path = os.path.join(
+        paths.logs,
+        "{}_epoch_loss_{}.log".format(model_name, timestamp)
     )
-    tensorboard = TensorBoard('./logs')
+    batch_loss_path = os.path.join(
+        paths.logs,
+        "{}_batch_loss_{}.log".format(model_name, timestamp)
+    )
+    model_hdf5_path = os.path.join(
+        paths.models,
+        "{}_{}.hdf5".format(model_name, timestamp)
+    )
+    history = LossHistory(
+        epoch_loss_path,
+        batch_loss_path,
+        model_hdf5_path
+    )
+    tensorboard = TensorBoard(log_dir=tb_log_path)
 
     try:
         model.fit_generator(
