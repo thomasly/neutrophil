@@ -5,7 +5,7 @@ Project: Neutrophil Identifier
 Author: Yang Liu
 Created date: Sep 5, 2018 4:13 PM
 -----
-Last Modified: Oct 4, 2018 5:12 PM
+Last Modified: Oct 4, 2018 5:18 PM
 Modified By: Yang Liu
 -----
 License: MIT
@@ -82,7 +82,7 @@ def plot_prc(recall, precision, average_precision, output_filename):
     plt.ylabel('Precision')
     plt.ylim([0.0, 1.05])
     plt.xlim([0.0, 1.0])
-    plt.title('2-class Precision-Recall curve: AP={0:0.2f}'.format(
+    plt.title('Neutrophil Identifier PRC: AP={0:0.2f}'.format(
             average_precision))
     fig.savefig(output_filename, dpi=fig.dpi)
     logging.info(f'prc curve saved to {output_filename}')
@@ -126,6 +126,7 @@ def evaluate_model(h5_file, pred_file):
 
         roc_name = filename_base + "_roc.png"
         prc_name = filename_base + "_prc.png"
+        clear_plot()
         plot_roc(fpr, tpr, roc_auc, roc_name)
         clear_plot()
         plot_prc(recall, precision, average_precision, prc_name)
