@@ -67,8 +67,8 @@ def evaluate_model(h5_file, pred_file):
         logging.debug(f'preds: {preds}')
         true_values = hdf5_file.root.test_labels
         fpr, tpr, _ = roc_curve(list(true_values), list(preds))
-        precision, recall, thresholds = prc(true_values, preds)
-        average_precision = average_precision_score(true_values, preds)
+        precision, recall, thresholds = prc(list(true_values), list(preds))
+        average_precision = average_precision_score(list(true_values), list(preds))
         roc_auc = auc(fpr, tpr)
 
         # plot and save roc
