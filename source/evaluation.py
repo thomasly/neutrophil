@@ -5,7 +5,7 @@ Project: Neutrophil Identifier
 Author: Yang Liu
 Created date: Sep 5, 2018 4:13 PM
 -----
-Last Modified: Oct 4, 2018 4:54 PM
+Last Modified: Oct 4, 2018 4:57 PM
 Modified By: Yang Liu
 -----
 License: MIT
@@ -146,4 +146,4 @@ def main():
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
-    main(sys.argv[1], sys.argv[2])
+    main()
