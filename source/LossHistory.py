@@ -106,8 +106,10 @@ class LossHistory(Callback):
         self.epoch_writer.writerow(row_dict)
         self.epoch_csv_file.flush()
 
-        if epoch % 10 == 0:
-            self.model.save(self.model_file)
+        if (epoch + 1) % 3 == 0:
+            self.model.save(
+                f"epoch{epoch}_" + os.path.basename(self.model_file)
+            )
             print(
                 "Model saved to {}!".format(
                     os.path.basename(self.model_file)))
