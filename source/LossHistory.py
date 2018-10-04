@@ -5,6 +5,7 @@ from keras.callbacks import Callback
 import six
 import csv
 import os
+import sys
 import numpy as np
 from collections import Iterable, OrderedDict
 
@@ -107,12 +108,15 @@ class LossHistory(Callback):
         self.epoch_csv_file.flush()
 
         if (epoch + 1) % 3 == 0:
+            filename = f"epoch{epoch}_" + os.path.basename(self.model_file)
             self.model.save(
-                f"epoch{epoch}_" + os.path.basename(self.model_file)
+                os.path.join(
+                    os.path.dirname(self.model_file),
+                    filename
+                )
             )
-            print(
-                "Model saved to {}!".format(
-                    os.path.basename(self.model_file)))
+            print("Model saved to {}!".format(filename))
+        sys.stdout.flush()
 
     def on_batch_end(self, batch, logs=None):
         logs = logs or {}
