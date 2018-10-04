@@ -1,3 +1,7 @@
+# tensorflow logs
+source/logs/
+logs/
+
 # VS code files
 
 .vscode/
