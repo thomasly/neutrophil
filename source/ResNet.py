@@ -5,7 +5,7 @@ Project: Neutrophil Identifier
 Author: Yang Liu
 Created date: Sep 5, 2018 4:13 PM
 -----
-Last Modified: Oct 4, 2018 11:28 AM
+Last Modified: Oct 4, 2018 11:38 AM
 Modified By: Yang Liu
 -----
 License: MIT
@@ -168,13 +168,13 @@ def ResNet50(input_shape=(299, 299, 3), classes=2):
     X_input = Input(input_shape)
 
     # Maxpooling added by Yang Liu
-    # X = MaxPooling2D((3,3), strides = (2, 2))(X_input)
+    X = MaxPooling2D((3, 3), strides=(2, 2))(X_input)
 
     # Stage 1
     X = Conv2D(
         64, (7, 7), strides=(2, 2), name='conv1',
         kernel_initializer=glorot_uniform(),
-        padding='same')(X_input)
+        padding='same')(X)
     X = BatchNormalization(axis=3, name='bn_conv1')(X)
     X = PReLU()(X)
     X = MaxPooling2D((3, 3), strides=(2, 2))(X)
