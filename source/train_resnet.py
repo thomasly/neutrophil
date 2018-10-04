@@ -5,7 +5,7 @@ Project: Neutrophil Identifier
 Author: Yang Liu
 Created date: Sep 5, 2018 4:13 PM
 -----
-Last Modified: Oct 3, 2018 6:00 PM
+Last Modified: Oct 4, 2018 9:20 AM
 Modified By: Yang Liu
 -----
 License: MIT
@@ -75,7 +75,7 @@ def train_resnet(
     model.compile(
             optimizer="adam",
             loss="binary_crossentropy",
-            metrics=["accuracy"]
+            metrics=["accuracy", "mae"]
             )
 
     hdf5_file = tables.open_file(hdf5_path, mode='r')
