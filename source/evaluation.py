@@ -5,7 +5,7 @@ Project: Neutrophil Identifier
 Author: Yang Liu
 Created date: Sep 5, 2018 4:13 PM
 -----
-Last Modified: Oct 4, 2018 12:48 PM
+Last Modified: Oct 4, 2018 12:58 PM
 Modified By: Yang Liu
 -----
 License: MIT
@@ -14,6 +14,7 @@ http://www.opensource.org/licenses/MIT
 
 import sys
 import tables
+import numpy as np
 from keras.models import load_model
 from math import ceil
 import matplotlib.pyplot as plt
@@ -58,6 +59,8 @@ def evaluate_model(h5_file, pred_file):
         generator = read_hdf5(hdf5_file, dataset="test", batch_size=32)
 
         preds = model.predict_generator(generator, steps=steps, verbose=1)
+        preds = np.array(preds)
+        preds = [np.where(r == 1)[0][0] for r in preds]
         true_values = hdf5_file.root.test_labels
         fpr, tpr, _ = roc_curve(list(true_values), list(preds))
         roc_auc = auc(fpr, tpr)
