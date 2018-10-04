@@ -5,7 +5,7 @@ Project: Neutrophil Identifier
 Author: Yang Liu
 Created date: Sep 5, 2018 4:13 PM
 -----
-Last Modified: Oct 4, 2018 9:53 AM
+Last Modified: Oct 4, 2018 9:55 AM
 Modified By: Yang Liu
 -----
 License: MIT
@@ -65,7 +65,7 @@ def train_resnet(
     """
     """
     start_time = datetime.now()
-    hdf5_path = os.path.join("..", "data", "76_79_80_noValidation.hdf5")
+    hdf5_path = os.path.join("..", "data", "76_79_80_noValidate.hdf5")
     if new_model:
         model = ResNet50()
 
