@@ -5,7 +5,7 @@ Project: Neutrophil Identifier
 Author: Yang Liu
 Created date: Sep 5, 2018 4:13 PM
 -----
-Last Modified: Oct 4, 2018 10:16 AM
+Last Modified: Oct 4, 2018 11:05 AM
 Modified By: Yang Liu
 -----
 License: MIT
@@ -16,6 +16,7 @@ from ResNet import ResNet50
 from read_hdf5 import read_hdf5
 import os
 import sys
+import logging
 import tables
 from keras.models import model_from_json
 from keras.callbacks import TensorBoard
@@ -84,7 +85,6 @@ def train_resnet(
 
     steps_per_epoch = int(ceil(n_train / batch_size))
     validation_steps = int(ceil(n_test / batch_size))
-    print(f'Validation steps: {validation_steps}, {type(validation_steps)}')
 
     history = LossHistory(
         'epoch_loss.log', 'batch_loss.log', 'resNet50_model.h5'
@@ -153,4 +153,5 @@ def main():
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     main()
