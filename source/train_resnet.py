@@ -5,7 +5,7 @@ Project: Neutrophil Identifier
 Author: Yang Liu
 Created date: Sep 5, 2018 4:13 PM
 -----
-Last Modified: Oct 4, 2018 9:55 AM
+Last Modified: Oct 4, 2018 9:58 AM
 Modified By: Yang Liu
 -----
 License: MIT
@@ -84,6 +84,7 @@ def train_resnet(
 
     steps_per_epoch = int(ceil(n_train / batch_size))
     validation_steps = int(ceil(n_test / batch_size))
+    print(f'Validation steps: {validation_steps}')
 
     history = LossHistory(
         'epoch_loss.log', 'batch_loss.log', 'model.json', 'weights.h5'
