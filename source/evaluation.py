@@ -5,13 +5,14 @@ Project: Neutrophil Identifier
 Author: Yang Liu
 Created date: Sep 5, 2018 4:13 PM
 -----
-Last Modified: Oct 4, 2018 2:53 PM
+Last Modified: Oct 4, 2018 4:54 PM
 Modified By: Yang Liu
 -----
 License: MIT
 http://www.opensource.org/licenses/MIT
 '''
 
+import os
 import sys
 import tables
 import logging
@@ -43,7 +44,7 @@ def read_hdf5(hdf5_file, dataset, batch_size):
             yield inputs
 
 
-def plot_roc(fpr, tpr, roc_auc):
+def plot_roc(fpr, tpr, roc_auc, output_filename):
     '''plot and save roc'''
     fig = plt.figure()
     lw = 2
@@ -58,10 +59,11 @@ def plot_roc(fpr, tpr, roc_auc):
     plt.ylabel('True Positive Rate')
     plt.title('Neutrophil Identifier ROC')
     plt.legend(loc="lower right")
-    fig.savefig("aoc.png", dpi=fig.dpi)
+    fig.savefig(output_filename, dpi=fig.dpi)
+    logging.info(f'roc curve saved to {output_filename}')
 
 
-def plot_prc(recall, precision, average_precision):
+def plot_prc(recall, precision, average_precision, output_filename):
     '''plot and save prc'''
     fig = plt.figure()
     step_kwargs = (
@@ -82,7 +84,8 @@ def plot_prc(recall, precision, average_precision):
     plt.xlim([0.0, 1.0])
     plt.title('2-class Precision-Recall curve: AP={0:0.2f}'.format(
             average_precision))
-    fig.savefig("prc.png", dpi=fig.dpi)
+    fig.savefig(output_filename, dpi=fig.dpi)
+    logging.info(f'prc curve saved to {output_filename}')
 
 
 def clear_plot():
@@ -104,6 +107,7 @@ def evaluate_model(h5_file, pred_file):
     try:
         batch_size = 32
         model = load_model(h5_file)
+        filename_base = os.path.basename(h5_file).split('_')[0]
 
         hdf5_file = tables.open_file(pred_file, mode='r')
         m_pred = hdf5_file.root.test_img.shape[0]
@@ -120,14 +124,26 @@ def evaluate_model(h5_file, pred_file):
             list(true_values), list(preds))
         roc_auc = auc(fpr, tpr)
 
-        plot_roc(fpr, tpr, roc_auc)
+        roc_name = filename_base + "_roc.png"
+        prc_name = filename_base + "_prc.png"
+        plot_roc(fpr, tpr, roc_auc, roc_name)
         clear_plot()
-        plot_prc(recall, precision, average_precision)
+        plot_prc(recall, precision, average_precision, prc_name)
 
     finally:
         hdf5_file.close()
 
 
+def main():
+    models = os.scandir(sys.argv[1])
+    for model in models:
+        logging.info(f'Analysing {model.name}')
+        if not model.name.endswith('.hdf5'):
+            logging.info(f'{model.name} is not a model file.')
+            continue
+        evaluate_model(model.path, sys.argv[2])
+
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
-    evaluate_model(sys.argv[1], sys.argv[2])
+    main(sys.argv[1], sys.argv[2])
