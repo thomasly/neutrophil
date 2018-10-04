@@ -5,7 +5,7 @@ Project: Neutrophil Identifier
 Author: Yang Liu
 Created date: Sep 5, 2018 4:13 PM
 -----
-Last Modified: Oct 4, 2018 12:58 PM
+Last Modified: Oct 4, 2018 12:59 PM
 Modified By: Yang Liu
 -----
 License: MIT
@@ -85,4 +85,4 @@ def evaluate_model(h5_file, pred_file):
 
 
 if __name__ == "__main__":
-    evaluate_model(sys.argv[1], sys.argv[2], sys.argv[3])
+    evaluate_model(sys.argv[1], sys.argv[2])
