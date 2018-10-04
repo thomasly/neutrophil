@@ -5,7 +5,7 @@ Project: Neutrophil Identifier
 Author: Yang Liu
 Created date: Sep 5, 2018 4:13 PM
 -----
-Last Modified: Oct 4, 2018 4:57 PM
+Last Modified: Oct 4, 2018 5:12 PM
 Modified By: Yang Liu
 -----
 License: MIT
@@ -129,6 +129,7 @@ def evaluate_model(h5_file, pred_file):
         plot_roc(fpr, tpr, roc_auc, roc_name)
         clear_plot()
         plot_prc(recall, precision, average_precision, prc_name)
+        clear_plot()
 
     finally:
         hdf5_file.close()
