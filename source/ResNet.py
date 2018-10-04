@@ -5,7 +5,7 @@ Project: Neutrophil Identifier
 Author: Yang Liu
 Created date: Sep 5, 2018 4:13 PM
 -----
-Last Modified: Oct 4, 2018 3:31 PM
+Last Modified: Oct 4, 2018 4:03 PM
 Modified By: Yang Liu
 -----
 License: MIT
@@ -14,7 +14,7 @@ http://www.opensource.org/licenses/MIT
 
 from keras.layers import Input, Add, Dense
 from keras.layers import BatchNormalization, Flatten, Conv2D, AveragePooling2D
-from keras.layers import MaxPooling2D, LeakyReLU
+from keras.layers import MaxPooling2D, PReLU
 from keras.models import Model
 from keras.initializers import glorot_uniform
 import keras.backend as K
@@ -58,14 +58,14 @@ def identity_block(X, f, filters, stage, block):
         strides=(1, 1), padding='valid', name=conv_name_base + '2a',
         kernel_initializer=glorot_uniform(seed=1))(X)
     X = BatchNormalization(axis=3, name=bn_name_base + '2a')(X)
-    X = LeakyReLU(alpha=0.2)(X)
+    X = PReLU()(X)
 
     # Second component of main path
     X = Conv2D(
         F2, (f, f), strides=(1, 1), padding="same", name=conv_name_base+"2b",
         kernel_initializer=glorot_uniform(seed=2))(X)
     X = BatchNormalization(axis=3, name=bn_name_base + "2b")(X)
-    X = LeakyReLU(alpha=0.2)(X)
+    X = PReLU()(X)
 
     # Third component of main path
     X = Conv2D(
@@ -77,7 +77,7 @@ def identity_block(X, f, filters, stage, block):
     # Final step: Add shortcut value to main path, and pass it through a
     # RELU activation
     X = Add()([X, X_shortcut])
-    X = LeakyReLU(alpha=0.2)(X)
+    X = PReLU()(X)
 
     return X
 
@@ -118,14 +118,14 @@ def convolutional_block(X, f, filters, stage, block, s=2):
         F1, (1, 1), strides=(s, s), padding="valid",
         name=conv_name_base + "2a", kernel_initializer=glorot_uniform())(X)
     X = BatchNormalization(axis=3, name=bn_name_base + '2a')(X)
-    X = LeakyReLU(alpha=0.2)(X)
+    X = PReLU()(X)
 
     # Second component of main path
     X = Conv2D(
         F2, (f, f), strides=(1, 1), padding="same",
         name=conv_name_base + "2b", kernel_initializer=glorot_uniform())(X)
     X = BatchNormalization(axis=3, name=bn_name_base + "2b")(X)
-    X = LeakyReLU(alpha=0.2)(X)
+    X = PReLU()(X)
 
     # Third component of main path
     X = Conv2D(
@@ -144,7 +144,7 @@ def convolutional_block(X, f, filters, stage, block, s=2):
     # Final step: Add shortcut value to main path, and pass it through a
     # RELU activation
     X = Add()([X, X_shortcut])
-    X = LeakyReLU(alpha=0.2)(X)
+    X = PReLU()(X)
 
     return X
 
@@ -176,7 +176,7 @@ def ResNet50(input_shape=(299, 299, 3), classes=2):
         kernel_initializer=glorot_uniform(),
         padding='same')(X_input)
     X = BatchNormalization(axis=3, name='bn_conv1')(X)
-    X = LeakyReLU(alpha=0.2)(X)
+    X = PReLU()(X)
     X = MaxPooling2D((3, 3), strides=(2, 2))(X)
 
     # Stage 2
