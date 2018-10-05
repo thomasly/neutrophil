@@ -77,7 +77,7 @@ def train_resnet(
     else:
         model = load_model_from_json()
 
-    adam_opt = Adam(lr=0.01, decay=1e-4)
+    adam_opt = Adam(lr=0.0001, decay=1e-6)
     model.compile(
             optimizer=adam_opt,
             loss="categorical_crossentropy",
