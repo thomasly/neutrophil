@@ -1,5 +1,14 @@
+# Figures
+*.png
+*.jpg
+*.jpeg
+*.tif
+*.tiff
+
 # trained models
 source/models/
+*.h5
+*.hdf5
 
 # tensorflow logs
 source/logs/
