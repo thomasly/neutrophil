@@ -176,7 +176,6 @@ def ResNet50(input_shape=(299, 299, 3), classes=2):
         32, (3, 3), strides=(2, 2), name='conv1',
         kernel_initializer=glorot_uniform(),
         padding='valid')(X_input)
-    X = BatchNormalization(axis=3, name='bn_conv1')(X)
     X = PReLU()(X)
     
     # 149 x 149 x 32
@@ -184,7 +183,6 @@ def ResNet50(input_shape=(299, 299, 3), classes=2):
         32, (3, 3), strides=(1, 1), name='conv2',
         kernel_initializer=glorot_uniform(),
         padding='valid')(X)
-    X = BatchNormalization(axis=3, name='bn_conv2')(X)
     X = PReLU()(X)
 
     # 147 x 147 x 32
@@ -192,7 +190,6 @@ def ResNet50(input_shape=(299, 299, 3), classes=2):
         64, (3, 3), strides=(1, 1), name='conv3',
         kernel_initializer=glorot_uniform(),
         padding='valid')(X)
-    X = BatchNormalization(axis=3, name='bn_conv3')(X)
     X = PReLU()(X)
     
     # 145 x 145 x 64
@@ -200,7 +197,6 @@ def ResNet50(input_shape=(299, 299, 3), classes=2):
         64, (3, 3), strides=(2, 2), name='conv4',
         kernel_initializer=glorot_uniform(),
         padding='valid')(X)
-    X = BatchNormalization(axis=3, name='bn_conv4')(X)
     X = PReLU()(X)
     
     # 72 x 72 x 64
