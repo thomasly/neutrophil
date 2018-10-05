@@ -5,7 +5,7 @@ Project: Neutrophil Identifier
 Author: Yang Liu
 Created date: Sep 5, 2018 4:13 PM
 -----
-Last Modified: Oct 5, 2018 3:14 PM
+Last Modified: Oct 5, 2018 4:03 PM
 Modified By: Yang Liu
 -----
 License: MIT
@@ -91,7 +91,7 @@ def train_resnet(
     steps_per_epoch = int(ceil(n_train / batch_size))
     validation_steps = int(ceil(n_test / batch_size))
 
-    timestamp = datetime.now().strftime(r"%Y%m%d_%I%M%p")
+    timestamp = datetime.now().strftime(r"%Y%m%d_%I%M%S%p")
     tb_log_path = os.path.join(
         paths.logs, '{}_logs_{}'.format(model_name, timestamp))
     os.makedirs(tb_log_path, exist_ok=True)
@@ -114,7 +114,12 @@ def train_resnet(
         batch_loss_path,
         model_hdf5_path
     )
-    tensorboard = TensorBoard(log_dir=tb_log_path)
+    tensorboard = TensorBoard(
+        log_dir=tb_log_path,
+        write_grads=True,
+        write_images=True,
+        histogram_freq=5
+    )
 
     try:
         model.fit_generator(
