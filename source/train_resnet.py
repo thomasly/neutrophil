@@ -5,7 +5,7 @@ Project: Neutrophil Identifier
 Author: Yang Liu
 Created date: Sep 5, 2018 4:13 PM
 -----
-Last Modified: Oct 4, 2018 12:34 PM
+Last Modified: Oct 5, 2018 3:14 PM
 Modified By: Yang Liu
 -----
 License: MIT
@@ -21,6 +21,7 @@ import tables
 from paths import Paths
 from keras.models import model_from_json
 from keras.callbacks import TensorBoard
+from keras.optimizers import Adam
 from math import ceil
 from datetime import datetime
 from LossHistory import LossHistory
@@ -76,8 +77,9 @@ def train_resnet(
     else:
         model = load_model_from_json()
 
+    adam_opt = Adam(lr=0.01, decay=1e-4)
     model.compile(
-            optimizer="adam",
+            optimizer=adam_opt,
             loss="categorical_crossentropy",
             metrics=["accuracy"]
             )
