@@ -1,3 +1,6 @@
+# trained models
+source/models/
+
 # tensorflow logs
 source/logs/
 logs/
