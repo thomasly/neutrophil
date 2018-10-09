@@ -107,8 +107,8 @@ class LossHistory(Callback):
         self.epoch_writer.writerow(row_dict)
         self.epoch_csv_file.flush()
 
-        if (epoch + 1) % 3 == 0:
-            filename = f"epoch{epoch}_" + os.path.basename(self.model_file)
+        if epoch < 5 or (epoch + 1) % 5 == 0:
+            filename = f"epoch{epoch+1}_" + os.path.basename(self.model_file)
             self.model.save(
                 os.path.join(
                     os.path.dirname(self.model_file),
