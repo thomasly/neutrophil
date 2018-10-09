@@ -5,7 +5,7 @@ Project: Neutrophil Identifier
 Author: Yang Liu
 Created date: Sep 5, 2018 4:13 PM
 -----
-Last Modified: Oct 4, 2018 5:18 PM
+Last Modified: Oct 9, 2018 10:21 AM
 Modified By: Yang Liu
 -----
 License: MIT
@@ -107,7 +107,8 @@ def evaluate_model(h5_file, pred_file):
     try:
         batch_size = 32
         model = load_model(h5_file)
-        filename_base = os.path.basename(h5_file).split('_')[0]
+        file_path = os.path.dirname(h5_file)
+        filename_base = os.path.basename(h5_file).split('.')[0]
 
         hdf5_file = tables.open_file(pred_file, mode='r')
         m_pred = hdf5_file.root.test_img.shape[0]
@@ -124,8 +125,8 @@ def evaluate_model(h5_file, pred_file):
             list(true_values), list(preds))
         roc_auc = auc(fpr, tpr)
 
-        roc_name = filename_base + "_roc.png"
-        prc_name = filename_base + "_prc.png"
+        roc_name = os.path.join(file_path, filename_base + "_roc.png")
+        prc_name = os.path.join(file_path, filename_base + "_prc.png")
         clear_plot()
         plot_roc(fpr, tpr, roc_auc, roc_name)
         clear_plot()
