@@ -16,7 +16,7 @@ import os
 import sys
 import logging
 from math import ceil
-from load_model_from_file import load_model_from_json
+from keras.models import load_model
 import numpy as np
 import tables as tb
 from paths import Paths
@@ -44,7 +44,7 @@ def predict(model_path, hdf5_file_path=None):
     """
     try:
         BATCH_SIZE = 32
-        model = load_model_from_json()
+        model = load_model(model_path)
         default_path = Paths.tiles_80
         if hdf5_file_path:
             hdf5_file = tb.open_file(hdf5_file_path, mode='r')
@@ -53,20 +53,21 @@ def predict(model_path, hdf5_file_path=None):
             hdf5_file = tb.open_file(default_path, mode='r')
 
         m_samples = hdf5_file.root.__getitem__("pred_img").shape[0]
+        logging.debug(f'# of samples: {m_samples}')
         steps = int(ceil(m_samples / BATCH_SIZE))
         generator = read_hdf5(hdf5_file, dataset="pred", batch_size=BATCH_SIZE)
         preds = model.predict_generator(generator, steps=steps, verbose=1)
-
-        hdf5_file.close()
-        print(preds[0:100])
+        logging.info(preds[0:100])
 
         save_path = os.path.join(Paths.data_test, "tiles_80_preds.csv")
         np.savetxt(save_path, preds, delimiter=',')
     except Exception as e:
         hdf5_file.close()
         logging.debug(e.with_traceback())
+    finally:
+        hdf5_file.close()
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
-    predict("./models/{}".format(sys.argv[1]))
+    predict(sys.argv[1])
