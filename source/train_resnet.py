@@ -12,7 +12,7 @@ License: MIT
 http://www.opensource.org/licenses/MIT
 '''
 
-from ResNet import ResNet50
+from ResNet_3 import ResNet50
 from read_hdf5 import read_hdf5
 import os
 import sys
@@ -116,9 +116,9 @@ def train_resnet(
     )
     tensorboard = TensorBoard(
         log_dir=tb_log_path,
-        write_grads=True,
-        write_images=True,
-        histogram_freq=5
+        # write_grads=True,
+        write_images=True
+        # histogram_freq=5
     )
 
     try:
