@@ -5,7 +5,7 @@ Project: Neutrophil Identifier
 Author: Yang Liu
 Created date: Sep 5, 2018 4:13 PM
 -----
-Last Modified: Oct 9, 2018 11:40 AM
+Last Modified: Oct 9, 2018 11:44 AM
 Modified By: Yang Liu
 -----
 License: MIT
@@ -14,6 +14,7 @@ http://www.opensource.org/licenses/MIT
 
 import os
 import sys
+import logging
 from math import ceil
 from load_model_from_file import load_model_from_json
 import numpy as np
@@ -61,10 +62,11 @@ def predict(model_path, hdf5_file_path=None):
 
         save_path = os.path.join(Paths.data_test, "tiles_80_preds.csv")
         np.savetxt(save_path, preds, delimiter=',')
-
-    finally:
+    except Exception as e:
         hdf5_file.close()
+        logging.debug(e.with_traceback())
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     predict("./models/{}".format(sys.argv[1]))
