@@ -5,7 +5,7 @@ Project: Neutrophil Identifier
 Author: Yang Liu
 Created date: Sep 5, 2018 4:13 PM
 -----
-Last Modified: Oct 9, 2018 11:30 AM
+Last Modified: Oct 9, 2018 11:40 AM
 Modified By: Yang Liu
 -----
 License: MIT
@@ -38,7 +38,7 @@ def read_hdf5(hdf5_file, dataset="pred", batch_size=32):
             yield inputs
 
 
-def pred(model_path, hdf5_file_path=None):
+def predict(model_path, hdf5_file_path=None):
     """
     """
     try:
@@ -59,11 +59,12 @@ def pred(model_path, hdf5_file_path=None):
         hdf5_file.close()
         print(preds[0:100])
 
-    finally:
         save_path = os.path.join(Paths.data_test, "tiles_80_preds.csv")
         np.savetxt(save_path, preds, delimiter=',')
+
+    finally:
         hdf5_file.close()
 
 
 if __name__ == "__main__":
-    pred("./models/{}".format(sys.argv[1]))
+    predict("./models/{}".format(sys.argv[1]))
