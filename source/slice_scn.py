@@ -5,7 +5,7 @@ Project: Neutrophil Identifier
 Author: Yang Liu
 Created date: Sep 5, 2018 4:13 PM
 -----
-Last Modified: Oct 10, 2018 5:04 PM
+Last Modified: Oct 10, 2018 5:13 PM
 Modified By: Yang Liu
 -----
 License: MIT
@@ -72,15 +72,14 @@ def v_slide(params):
         scn_file.close()
 
 
-def listener(q):
+def listener(q, output_path):
     """
     """
     try:
-        paths = Paths()
         counter = 0
         pid = os.getpid()
         print("Listener running on {}".format(pid))
-        hdf5_file = tb.open_file(paths.tiles_80, mode='w')
+        hdf5_file = tb.open_file(output_path, mode='w')
         pred_storage = hdf5_file.create_earray(
             hdf5_file.root,
             "pred_img",
@@ -103,7 +102,7 @@ def listener(q):
         while 1:
             counter += 1
             if counter % 100 == 0:
-                print("{} tiles saved in hdf5.".format(counter), end="\r")
+                print("{} tiles saved in hdf5.".format(counter))
             data = q.get()
             if data == 'kill':
                 print("Listner closed.")
@@ -121,7 +120,7 @@ def listener(q):
 
 
 @timer
-def slide_scn(scn_file=None, save_tiles=False):
+def slide_scn(scn_file, output_path, save_tiles=False):
     """
     Slide the whole scn file into tiles. Tiles sizes are (299, 299).
     Tiles have a half of the tile width overlapping with the tiles beside them
@@ -142,25 +141,14 @@ def slide_scn(scn_file=None, save_tiles=False):
     """
 
     # open scn_file
-    if not scn_file:
-        try:
-            scn_file = OpenSlide(Paths.slice_80)
+    try:
+        scn_file = OpenSlide(scn_file)
 
-        except OpenSlideUnsupportedFormatError:
-            print("OpenSlideUnsupportedFormatError!")
-            return
-        except OpenSlideError:
-            print("OpenSlideError!")
-            return
-    else:
-        try:
-            scn_file = OpenSlide(scn_file)
-
-        except OpenSlideUnsupportedFormatError:
-            print("OpenSlideUnsupportedFormatError!")
-            return
-        except OpenSlideError:
-            print("OpenSlideError!")
+    except OpenSlideUnsupportedFormatError:
+        print("OpenSlideUnsupportedFormatError!")
+        return
+    except OpenSlideError:
+        print("OpenSlideError!")
 
     # get attributes of the scn_file
     x0 = int(scn_file.properties["openslide.bounds-x"])
@@ -178,7 +166,7 @@ def slide_scn(scn_file=None, save_tiles=False):
     q = manager.Queue()
 
     # run the listener
-    watcher = mp.Process(target=listener, args=(q, ))
+    watcher = mp.Process(target=listener, args=(q, output_path))
 
     # parameters passed to pool.map() function need to be packed in a list
     tasks = []
@@ -212,4 +200,4 @@ def slide_scn(scn_file=None, save_tiles=False):
 
 
 if __name__ == "__main__":
-    slide_scn(scn_file=sys.argv[1], save_tiles=False)
+    slide_scn(scn_file=sys.argv[1], output_path=sys.argv[2], save_tiles=False)
