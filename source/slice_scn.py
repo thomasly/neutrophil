@@ -5,7 +5,7 @@ Project: Neutrophil Identifier
 Author: Yang Liu
 Created date: Sep 5, 2018 4:13 PM
 -----
-Last Modified: Oct 10, 2018 5:13 PM
+Last Modified: Oct 10, 2018 5:43 PM
 Modified By: Yang Liu
 -----
 License: MIT
@@ -16,6 +16,7 @@ from openslide import OpenSlide
 from openslide import OpenSlideUnsupportedFormatError, OpenSlideError
 import os
 import sys
+import logging
 from utils import timer
 import tables as tb
 import numpy as np
@@ -32,10 +33,10 @@ def v_slide(params):
         try:
             scn_file = OpenSlide(paths.slice_80)
         except OpenSlideUnsupportedFormatError:
-            print("OpenSlideUnsupportedFormatError!")
+            logging.error("OpenSlideUnsupportedFormatError!")
             return
         except OpenSlideError:
-            print("OpenSlideError!")
+            logging.error("OpenSlideError!")
             return
 
         start_point = params["start_point"]
@@ -145,16 +146,17 @@ def slide_scn(scn_file, output_path, save_tiles=False):
         scn_file = OpenSlide(scn_file)
 
     except OpenSlideUnsupportedFormatError:
-        print("OpenSlideUnsupportedFormatError!")
+        logging.error("OpenSlideUnsupportedFormatError!")
         return
     except OpenSlideError:
-        print("OpenSlideError!")
+        logging.error("OpenSlideError!")
 
     # get attributes of the scn_file
     x0 = int(scn_file.properties["openslide.bounds-x"])
     y0 = int(scn_file.properties["openslide.bounds-y"])
     width = int(scn_file.properties["openslide.bounds-width"])
     height = int(scn_file.properties["openslide.bounds-height"])
+    logging.debug(f'x0: {x0}, y0: {y0}, width: {width}, height: {height}')
     bound_x = x0 + width - 150
     bound_y = y0 + height - 150
     start_point = [x0 + 150, y0 + 150]
@@ -193,10 +195,11 @@ def slide_scn(scn_file, output_path, save_tiles=False):
 
     # kill listener
     q.put("kill")
-    print("killer sent.")
+    logging.debug("killer sent.")
     watcher.join()
     pool.close()
-    print("\nDone!")
+    pool.join()
+    logging.debug("\nDone!")
 
 
 if __name__ == "__main__":
