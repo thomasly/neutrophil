@@ -1,3 +1,6 @@
+# prediction results
+*.csv
+
 # codes from others
 codeFromRunyu/
 
