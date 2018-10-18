@@ -79,7 +79,7 @@ def listener(q, output_path):
     try:
         counter = 0
         pid = os.getpid()
-        print("Listener running on {}".format(pid))
+        logging.info("Listener running on {}".format(pid))
         hdf5_file = tb.open_file(output_path, mode='w')
         pred_storage = hdf5_file.create_earray(
             hdf5_file.root,
@@ -103,10 +103,11 @@ def listener(q, output_path):
         while 1:
             counter += 1
             if counter % 100 == 0:
-                print("{} tiles saved in hdf5.".format(counter))
+                logging.info("{} tiles saved in hdf5.".format(counter))
             data = q.get()
             if data == 'kill':
-                print("Listner closed.")
+                logging.info("Listner closed.")
+                hdf5_file.close()
                 return None
             pred = data['pred']
             xlabel = data['xlabel']
